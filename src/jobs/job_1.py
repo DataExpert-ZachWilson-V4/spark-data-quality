@@ -23,3 +23,4 @@ def main():
     )
     output_df = job_1(spark_session, output_table_name)
     output_df.write.mode("overwrite").insertInto(output_table_name)
+
