@@ -29,7 +29,7 @@ def query_1(output_table_name: str, current_year: int) -> str:
             AVG(rating) as rating,
             MAX(year) as year
         FROM
-            bootcamp.actor_films
+            actor_films
         WHERE
             year = {current_year + 1}
         group by
@@ -69,7 +69,7 @@ def job_1(spark_session: SparkSession, output_table_name: str, current_year: int
   return spark_session.sql(query_1(output_table_name, current_year))
 
 def main():
-    output_table_name: str = "barrocaeric.actors"
+    output_table_name: str = "actors"
 
     spark_session: SparkSession = (
         SparkSession.builder
