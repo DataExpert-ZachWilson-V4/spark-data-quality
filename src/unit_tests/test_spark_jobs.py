@@ -4,12 +4,16 @@ from ..jobs.job_2 import month_start, job_2
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, DoubleType, LongType
 from collections import namedtuple
 
+# Was having trouble to test it locally, thus I added this to help pytest find pyspark engine
 import os
 import sys
 
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
+# This is not an extensive test, just a demonstration.
+# It tests if films made by the same actor in the same year are grouped together in the films array
+# and if films made by an actor in years different from the current one are excluded from the insertion
 def test_actors_acc(spark_session):
 
     actor_films = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
@@ -57,6 +61,7 @@ def test_actors_acc(spark_session):
 
     expected_df = spark_session.createDataFrame(expected_output)
 
+    # Needed to create the first iteration of the table since it did not exist in the environment
     initial_df = spark_session.createDataFrame(data=[], schema=StructType([
         StructField("actor", StringType(), True),
         StructField("actor_id", StringType(), True),
@@ -78,33 +83,53 @@ def test_actors_acc(spark_session):
     actual_df = job_1(spark_session, "actors", current_year)
 
     # Verifying that the dataframes are identical
+    # Ignoring row orders to make it easier to match the expected to the actual data
     assert_df_equality(actual_df, expected_df, ignore_nullable=True, ignore_row_order=True)
 
+# Demonstrative of an unit test for an reduced table
+# running at the second day of the started month.
+# It tests if the metrics counts are aggregated correclty in the metric_array column
+# And if data is not repeated
+def test_host_activity_reduced(spark_session):
 
-# def test_host_activity_reduced(spark_session):
+    daily_web_metrics = namedtuple("DailyWebMetrics", "host metric_name metric_value date")
+    host_activity_reduced = namedtuple("HostActivityReduced", "host metric_name metric_array month_start")
+    current_date = '2023-08-02'
 
-#     daily_web_metrics = namedtuple("DailyWebMetrics", "actor actor_id film year votes rating film_id")
-#     actor = namedtuple("Actor", "actor actor_id films quality_class is_active current_year")
+    # Creating fake input for daily_web_metrics table
+    input_data = [
+        daily_web_metrics("admin.zachwilson.tech", "visited_home_page", 5, "2022-08-08"),
+        daily_web_metrics("www.zachwilson.tech", "visited_home_page", 53, month_start),
+        daily_web_metrics("www.eczachly.com", "visited_home_page", 53, month_start),
+        daily_web_metrics("dutchengineer.techcreator.io", "visited_home_page", 30, month_start),
+        daily_web_metrics("dutchengineer.techcreator.io", "visited_home_page", 10, current_date)
+    ]
 
-#     # Creating fake input for actor_films table
-#     input_data = [
-        
-#     ]
+    # Generating the daily_web_metrics data based on the fake input
+    input_data = spark_session.createDataFrame(input_data)
+    input_data.createOrReplaceTempView("daily_web_metrics")
 
-#     # Generating the actor_films data based on the fake input
-#     input_data = spark_session.createDataFrame(input_data)
-#     input_data.createOrReplaceTempView("barrocaeric.daily_web_metrics")
+     # Simulates the reduced table with the first day populated
+    initial_data = [
+        host_activity_reduced("www.zachwilson.tech", "visited_home_page", [53], month_start),
+        host_activity_reduced("www.eczachly.com", "visited_home_page", [53], month_start),
+        host_activity_reduced("dutchengineer.techcreator.io", "visited_home_page", [30], month_start)
+    ]
+   
+    initial_df = spark_session.createDataFrame(initial_data)
+    initial_df.createOrReplaceTempView("host_activity_reduced")
 
-#     # Expected output based on our input
-#     # Since this job starts with and empty table,
-#     expected_output = [
-        
-#     ]
+    # Expected output based on our input
+    expected_output = [
+        host_activity_reduced("www.eczachly.com", "visited_home_page", [53, None], month_start),
+        host_activity_reduced("www.zachwilson.tech", "visited_home_page", [53, None], month_start),
+        host_activity_reduced("dutchengineer.techcreator.io", "visited_home_page", [30, 10], month_start)
+    ]
 
-#     expected_df = spark_session.createDataFrame(expected_output)
+    expected_df = spark_session.createDataFrame(expected_output)
 
-#     # Running our actual job
-#     actual_df = job_2(spark_session, "barrocaeric.host_activity_reduced", month_start)
+    # Running our actual job
+    actual_df = job_2(spark_session, "host_activity_reduced", month_start, current_date)
 
-#     # Verifying that the dataframes are identical
-#     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
+    # Verifying that the dataframes are identical
+    assert_df_equality(actual_df, expected_df, ignore_nullable=True, ignore_row_order=True)
