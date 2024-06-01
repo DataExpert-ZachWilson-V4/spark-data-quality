@@ -4,16 +4,6 @@ from collections import namedtuple
 from ..jobs.job_2 import job_2
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType
 
-# The code below tests whether job_1 correctly generates data to be loaded into nba_player_scd_merge
-# Named tuples:
-#   - PlayerSeason - input data, representing the nba_players table
-#   - PlayerScd - output data, representing the nba_player_scd_merge table
-# The schema of the Spark dataframes is created dynamically from the data in the named tuples
-# There are three test cases included below:
-#   - Michael Jordan - a player who is active at the beginning of the reporting period (2001), becomes inactive, and stays inactive
-#   - Scottie Pippien - a player who is active at the beginning of the reporting period (2001), becomes inactive, and later becomes active a second time
-#   - Lebron James - a player whose career began after the beginning of the reporting period.
-
 PlayerSeason = namedtuple("PlayerSeason", "player_name is_active current_season")
 PlayerScd = namedtuple("PlayerScd", "player_name is_active start_season end_season")
 
@@ -49,20 +39,6 @@ def test_job_1(spark_session):
     expected_df = spark_session.createDataFrame(expected_data)
     assert_df_equality(actual_df.sort("player_name", "start_season"), expected_df.sort("player_name", "start_season"))
 
-
-
-# The code below tests whether job_2 correctly generates data to be loaded into web_users_cumulated
-# Named tuples:
-#   - InputCumulative - input data, representing the web_users_cumulated table as of yesterday
-#   - InputEvents - input data, representing the web_events table for today
-#   - OutputCumulative - output data, representing the web_users_cumulated with today's data added
-# The Spark Dataframes created from the named tuples are created with a defined schema of user_id, dates_active, and date,
-#   which are respectively a long, an array of strings, and a string (dates are treated as strings for ease of testing)
-# There are four test cases included below, based on user_id:
-#   - user_id = 1 - A user who logged in yesterday and logged in today
-#   - user_id = 2 - A new user as of today
-#   - user_id = 3 - A user who logged in yesterday but did not log in in today
-#   - user_id = 4 - A user who logged in 3 days ago, has not logged in since, and logs in twice today
 
 InputCumulative = namedtuple("InputCumulative", "user_id dates_active date")
 InputEvents = namedtuple("InputEvents", "user_id event_time")
