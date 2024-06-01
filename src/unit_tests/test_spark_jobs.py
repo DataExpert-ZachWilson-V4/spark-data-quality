@@ -1,6 +1,9 @@
 import pytest
 from pyspark.sql import SparkSession
-from src.jobs.job_1 import job_1, query_1
+from pyspark.sql.types import *
+from src.jobs.job_1 import job_1
+from src.jobs.job_2 import job_2
+from pyspark.sql.functions import *
 
 @pytest.fixture(scope="session")
 def spark():
@@ -28,6 +31,64 @@ def actors_table(spark):
     yield actors_df
     spark.catalog.dropTempView("actors")
 
+@pytest.fixture(scope="function")
+def web_events_table(spark):
+    data = [
+        ('user001','device01','2023-01-01 00:46:23.897 UTC'),
+        ('user001','device01','2023-01-01 00:46:23.897 UTC'),
+        ('user001','device01','2023-01-02 00:46:23.897 UTC'),
+        ('user001','device01','2023-01-03 00:46:23.897 UTC'),
+        ('user001','device02','2023-01-03 00:46:23.897 UTC'),
+        ('user001','device02','2023-01-03 00:46:23.897 UTC'),
+        ('user002','device02','2023-01-01 00:46:23.897 UTC'),
+        ('user002','device02','2023-01-02 00:46:23.897 UTC'),
+        ('user002','device02','2023-01-02 00:46:23.897 UTC'),
+        ('user002','device02','2023-01-02 00:46:23.897 UTC'),
+        ('user002','device03','2023-01-02 00:46:23.897 UTC'),
+    ]
+    schema = StructType([
+        StructField('user_id', StringType(), True),
+        StructField('device_id', StringType(), True),
+        StructField('event_time', StringType(), True)
+        ])
+    web_events_df = spark.createDataFrame(data, schema).withColumn("event_time", col("event_time").cast("timestamp"))
+    web_events_df.createOrReplaceTempView("web_events")
+    yield web_events_df
+    spark.catalog.dropTempView("web_events")
+
+@pytest.fixture(scope="function")
+def user_devices_cumulated_table(spark):
+    schema = schema = StructType([
+        StructField('user_id', StringType(), True),
+        StructField('browser_type', StringType(), True),
+        StructField('dates_active', ArrayType(DateType(), True), True),
+        StructField('date', DateType(), True)
+        ])
+    
+    # Create an empty DataFrame with the schema
+    user_devices_cumulated_df = spark.createDataFrame([], schema)
+    # Insert the initial empty DataFrame into the managed table
+    user_devices_cumulated_df.createOrReplaceTempView("user_devices_cumulated")
+    yield user_devices_cumulated_df
+    spark.catalog.dropTempView("user_devices_cumulated")
+
+@pytest.fixture(scope="function")
+def devices_table(spark):
+    data = [
+        ('device01', 'chrome'),
+        ('device02', 'ie'),
+        ('device03', 'chrome'),
+    ]
+    schema = StructType([
+        StructField('device_id', StringType(), True),
+        StructField('browser_type', StringType(), True)
+        ])
+    devices_df = spark.createDataFrame(data, schema)
+    devices_df.createOrReplaceTempView("devices")
+    yield devices_df
+    spark.catalog.dropTempView("devices")
+    
+
 def test_job_1(spark, actors_table):
 
     actual = job_1(spark, "actors")
@@ -42,6 +103,26 @@ def test_job_1(spark, actors_table):
     ]
     expected_schema = ["actor", "actor_id", "quality_class", "is_active", "start_date", "end_date", "current_year"]
     expected_df = spark.createDataFrame(data=expected_data, schema=expected_schema)
+
+    assert actual.collect() == expected_df.collect()
+
+def test_job_2(spark, web_events_table, devices_table, user_devices_cumulated_table):
+
+    actual = job_2(spark, "user_devices_cumulated", "2023-01-01")
+
+    # Create the data
+    expected_data = [
+        ('user002', 'chrome', ['2023-01-01'], '2023-01-01'),
+        ('user001', 'chrome', ['2023-01-01'], '2023-01-01'),
+        ('user002', 'ie', ['2023-01-01'], '2023-01-01')
+    ]
+    expected_schema = ["user_id", "browser_type", "dates_active", "date"]
+    # Create the DataFrame
+    expected_df_not_transformed = spark.createDataFrame(expected_data, expected_schema)
+
+    # Convert string dates to DateType
+    expected_df = expected_df_not_transformed.withColumn("dates_active", array(to_date(col("dates_active")[0], 'yyyy-MM-dd')))\
+        .withColumn("date", to_date(col("date"), 'yyyy-MM-dd'))    
 
     assert actual.collect() == expected_df.collect()
 
