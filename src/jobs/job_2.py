@@ -3,8 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 import datetime
 
-# query_2 below is the source query to add one day to the dates_active array of the web_users_cumulated table,
-# which shows dates each user was active on one of the DataExpert.io web pages
+# query_2 below is the source query to add one day to the dates_active array of the web_users_cumulated table
 def query_2(cumulated_table_name: str, event_table_name: str, current_date: str) -> str:
     date_format = '%Y-%m-%d'
     previous_date = datetime.datetime.strptime(current_date, date_format) + datetime.timedelta(days=-1)
@@ -33,7 +32,7 @@ def query_2(cumulated_table_name: str, event_table_name: str, current_date: str)
     """
 
 # Like job_1(), I made some edits to the main() and job_2() definitions to more closely match what Zach demonstrated in the V4 Week 4 Day 3 Lab (V3 Week 5 Day 1).
-# Here we are querying the web_events table and building a dataframe concatenating that result into an array of active dates for each user in web_users_cumulated.
+# Here we are querying the web_events table and building a dataframe to load into web_users_cumulated.
 # That dataframe then will be loaded to web_users_cumulated, which is a cumulative table of one row per user with an array of dates that user was active.
 # I have updated the varable names appropriately:
 #   event_table_name - the source table for the current day's active users, web_events

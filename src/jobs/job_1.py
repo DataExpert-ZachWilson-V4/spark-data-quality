@@ -2,8 +2,7 @@ from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-# query_1 below is the full load query for the nba_player_scd_merge table, 
-# which is an SCD Type 2 showing date ranges of when players were active/inactive
+# query_1 below is the full load query for the nba_player_scd_merge table
 def query_1(input_table_name: str) -> str:
     return f"""
         WITH lagged AS (
