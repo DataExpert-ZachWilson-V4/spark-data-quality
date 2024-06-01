@@ -4,7 +4,49 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_1(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+    WITH -- getting the previous years quality_class with LAG function, to make the ready for the newxt aggregation query
+    lagged AS (
+        SELECT actor,
+            actor_id,
+            quality_class,
+            LAG(quality_class, 1) OVER (
+                PARTITION BY actor
+                ORDER BY current_year
+            ) AS quality_class_last_year,
+            is_active,
+            current_year
+        FROM actors -- loading data form the current date 1921 to backwards
+        WHERE current_year <= 1921
+    ),
+    -- we are defining if the quality class changed. We are summing them. Only tha changed one will be incremented by 1, and eventually we are aggregating to get start and end date.
+    changed AS (
+        SELECT *,
+            SUM(
+                CASE
+                    WHEN quality_class = quality_class_last_year
+                    OR (
+                        quality_class IS NULL
+                        and quality_class_last_year IS NULL
+                    ) THEN 0
+                    ELSE 1
+                END
+            ) OVER (
+                PARTITION BY actor
+                ORDER BY current_year
+            ) AS streak
+        FROM lagged
+    )
+    SELECT actor,
+        actor_id,
+        MAX(quality_class) AS quality_class,
+        MAX(is_active) AS is_active,
+        MIN(current_year) AS start_date,
+        MAX(current_year) AS end_date,
+        1921 AS current_year
+    FROM changed
+    GROUP BY actor,
+        actor_id,
+        streak
     """
     return query
 
@@ -14,7 +56,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_1(output_table_name))
 
 def main():
-    output_table_name: str = "<output table name here>"
+    output_table_name: str = "spark_actors_history_scd"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
