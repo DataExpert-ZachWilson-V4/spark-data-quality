@@ -4,7 +4,7 @@ from collections import namedtuple
 from ..jobs.job_2 import job_2
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType
 
-# The code below tests whether job_1 correctly generates data to be loaded into the current partition of nba_player_scd_merge
+# The code below tests whether job_1 correctly generates data to be loaded into nba_player_scd_merge
 # Named tuples:
 #   - PlayerSeason - input data, representing the nba_players table
 #   - PlayerScd - output data, representing the nba_player_scd_merge table
@@ -51,10 +51,10 @@ def test_job_1(spark_session):
 
 
 
-# The code below tests whether job_2 correctly generates data to be loaded into the current partition of web_users_cumulated
+# The code below tests whether job_2 correctly generates data to be loaded into web_users_cumulated
 # Named tuples:
 #   - InputCumulative - input data, representing the web_users_cumulated table as of yesterday
-#   - InputEvents - input data, representing the web_events table for today (meaning the most recent data date)
+#   - InputEvents - input data, representing the web_events table for today
 #   - OutputCumulative - output data, representing the web_users_cumulated with today's data added
 # The Spark Dataframes created from the named tuples are created with a defined schema of user_id, dates_active, and date,
 #   which are respectively a long, an array of strings, and a string (dates are treated as strings for ease of testing)
