@@ -143,22 +143,18 @@ def test_actors_cumulative_scd(spark_session):
     ]
     spark = spark_session()
     actors_df = spark.createDataFrame(actual_actors_data, schema=actor_schema)
-    # actors_df.show()
     actor_films_df = spark.createDataFrame(actual_actor_films_data, schema=actor_films_schema)
-    # actor_films_df.show()
 
     actors_df.createOrReplaceTempView("actors")
     actor_films_df.createOrReplaceTempView("actor_films")
 
     expected_df = spark.createDataFrame(expected_data, actor_schema)
-    # expected_df.show()
 
     actual_df = job_1.job_1(
         spark, 
         "actors",
         "actor_films",
-        1916,
-        "actors"
+        1916
     )
 
     assert_df_equality(actual_df, expected_df, ignore_row_order=True)

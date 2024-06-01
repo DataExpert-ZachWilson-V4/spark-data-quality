@@ -1,6 +1,5 @@
 from datetime import datetime
 from pyspark.sql.types import *
-from pyspark.sql.functions import *
 from collections import namedtuple
 from chispa.dataframe_comparer import  assert_df_equality
 from ..jobs import job_2
@@ -76,16 +75,12 @@ def test_inc_host_data(spark_session):
 
     host_df.createOrReplaceTempView("host_cumulated")
     web_events_df.createOrReplaceTempView("web_events")
-    # host_df.show()
-    # web_events_df.show(truncate=False)
-    # expected_df.show()
 
     actual_df = job_2.job_2(
         spark, 
         "host_cumulated",
         "web_events",
-        "2023-01-01",
-        "host_cumulated"
+        "2023-01-01"
     )
 
     assert_df_equality(actual_df, expected_df, ignore_row_order=True)
