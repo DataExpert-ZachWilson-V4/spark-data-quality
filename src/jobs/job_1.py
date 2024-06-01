@@ -30,16 +30,6 @@ schema = StructType(
         StructField("ftm", DoubleType(), True),
         StructField("fta", DoubleType(), True),
         StructField("ft_pct", DoubleType(), True),
-        StructField("oreb", DoubleType(), True),
-        StructField("dreb", DoubleType(), True),
-        StructField("reb", DoubleType(), True),
-        StructField("ast", DoubleType(), True),
-        StructField("stl", DoubleType(), True),
-        StructField("blk", DoubleType(), True),
-        StructField("to", DoubleType(), True),
-        StructField("pf", DoubleType(), True),
-        StructField("pts", DoubleType(), True),
-        StructField("plus_minus", DoubleType(), True),
     ]
 )
 
@@ -91,17 +81,7 @@ def query_1(input_table_name: str) -> str:
             fg3_pct,
             ftm,
             fta,
-            ft_pct,
-            oreb,
-            dreb,
-            reb,
-            ast,
-            stl,
-            blk,
-            to,
-            pf,
-            pts,
-            plus_minus
+            ft_pct
         FROM
             row_nums
         --keep only the first occurrence for duplicate records

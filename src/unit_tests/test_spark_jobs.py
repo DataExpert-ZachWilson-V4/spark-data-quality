@@ -28,7 +28,7 @@ def spark():
 
 Game = namedtuple(
     "Game",
-    "game_id team_id team_abbreviation team_city player_id player_name nickname start_position comment min fgm fga fg_pct fg3m fg3a fg3_pct ftm fta ft_pct oreb dreb reb ast stl blk to pf pts plus_minus",
+    "game_id team_id team_abbreviation team_city player_id player_name nickname start_position comment min fgm fga fg_pct fg3m fg3a fg3_pct ftm fta ft_pct",
 )
 
 DeviceHistory = namedtuple(
@@ -63,16 +63,6 @@ def test_game_details_dedupe(spark):
             4.0,
             4.0,
             1.0,
-            2.0,
-            4.0,
-            6.0,
-            5.0,
-            0.0,
-            2.0,
-            1.0,
-            2.0,
-            17.0,
-            -14.0,
         ),
         Game(
             20801112,
@@ -94,16 +84,6 @@ def test_game_details_dedupe(spark):
             4.0,
             4.0,
             1.0,
-            2.0,
-            4.0,
-            6.0,
-            5.0,
-            0.0,
-            2.0,
-            1.0,
-            2.0,
-            17.0,
-            -14.0,
         ),
     ]
 
@@ -128,16 +108,6 @@ def test_game_details_dedupe(spark):
             StructField("ftm", DoubleType(), True),
             StructField("fta", DoubleType(), True),
             StructField("ft_pct", DoubleType(), True),
-            StructField("oreb", DoubleType(), True),
-            StructField("dreb", DoubleType(), True),
-            StructField("reb", DoubleType(), True),
-            StructField("ast", DoubleType(), True),
-            StructField("stl", DoubleType(), True),
-            StructField("blk", DoubleType(), True),
-            StructField("to", DoubleType(), True),
-            StructField("pf", DoubleType(), True),
-            StructField("pts", DoubleType(), True),
-            StructField("plus_minus", DoubleType(), True),
         ]
     )
 
@@ -171,16 +141,6 @@ def test_game_details_dedupe(spark):
             4.0,
             4.0,
             1.0,
-            2.0,
-            4.0,
-            6.0,
-            5.0,
-            0.0,
-            2.0,
-            1.0,
-            2.0,
-            17.0,
-            -14.0,
         )
     ]
 
