@@ -28,7 +28,7 @@ def spark():
 
 Game = namedtuple(
     "Game",
-    "game_id team_id team_abbreviation team_city player_id player_name nickname start_position comment min fgm fga fg_pct fg3m fg3a fg3_pct ftm fta ft_pct",
+    "game_id team_id team_abbreviation team_city player_id player_name nickname start_position comment min fgm fga fg_pct",
 )
 
 DeviceHistory = namedtuple(
@@ -57,12 +57,6 @@ def test_game_details_dedupe(spark):
             6.0,
             13.0,
             0.462,
-            1.0,
-            3.0,
-            0.333,
-            4.0,
-            4.0,
-            1.0,
         ),
         Game(
             20801112,
@@ -78,12 +72,6 @@ def test_game_details_dedupe(spark):
             6.0,
             13.0,
             0.462,
-            1.0,
-            3.0,
-            0.333,
-            4.0,
-            4.0,
-            1.0,
         ),
     ]
 
@@ -102,12 +90,6 @@ def test_game_details_dedupe(spark):
             StructField("fgm", DoubleType(), True),
             StructField("fga", DoubleType(), True),
             StructField("fg_pct", DoubleType(), True),
-            StructField("fg3m", DoubleType(), True),
-            StructField("fg3a", DoubleType(), True),
-            StructField("fg3_pct", DoubleType(), True),
-            StructField("ftm", DoubleType(), True),
-            StructField("fta", DoubleType(), True),
-            StructField("ft_pct", DoubleType(), True),
         ]
     )
 
@@ -135,12 +117,6 @@ def test_game_details_dedupe(spark):
             6.0,
             13.0,
             0.462,
-            1.0,
-            3.0,
-            0.333,
-            4.0,
-            4.0,
-            1.0,
         )
     ]
 

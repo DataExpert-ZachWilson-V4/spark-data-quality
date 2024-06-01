@@ -24,12 +24,6 @@ schema = StructType(
         StructField("fgm", DoubleType(), True),
         StructField("fga", DoubleType(), True),
         StructField("fg_pct", DoubleType(), True),
-        StructField("fg3m", DoubleType(), True),
-        StructField("fg3a", DoubleType(), True),
-        StructField("fg3_pct", DoubleType(), True),
-        StructField("ftm", DoubleType(), True),
-        StructField("fta", DoubleType(), True),
-        StructField("ft_pct", DoubleType(), True),
     ]
 )
 
@@ -75,13 +69,7 @@ def query_1(input_table_name: str) -> str:
             min,
             fgm,
             fga,
-            fg_pct,
-            fg3m,
-            fg3a,
-            fg3_pct,
-            ftm,
-            fta,
-            ft_pct
+            fg_pct
         FROM
             row_nums
         --keep only the first occurrence for duplicate records
