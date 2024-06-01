@@ -67,11 +67,8 @@ def query_1(input_table_name: str, base_table: str, current_year: int) -> str:
 def job_1(spark_session: SparkSession, 
           input_table_name: str,
           base_table: str,
-          current_year: int,
-          output_table_name: str
+          current_year: int
 )-> Optional[DataFrame]:
-  output_df = spark_session.table(output_table_name)
-  output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_1(input_table_name, base_table, current_year))
 
 def main():
@@ -89,8 +86,7 @@ def main():
        spark_session, 
        input_table_name,
        base_table,
-       current_year,
-       output_table_name
+       current_year
     )
     output_df.write.mode("append").insertInto(output_table_name)
 
