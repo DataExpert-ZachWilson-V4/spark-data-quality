@@ -42,7 +42,6 @@ def query_2(cumulated_table_name: str, event_table_name: str, current_date: str)
 #   cumulated_df - definition of the existing cumulated table (web_users_cumulated) for the Spark Session (as of yesterday)
 #   output_df - Dataframe containing results of query_2, to be written to web_users_cumulated, with overwrite option. This adds today's data to web_users_cumulated
 # I have also added logic so that dates can be passed in dynamically, with yesterday's date calculated from today's date and formatted for use with SparkSQL
-# Having a standalone function (here - job_2()) which creates the output Dataframe allows the query logic to be subjected to unit tests.
 def job_2(spark_session: SparkSession, cumulated_df: DataFrame, cumulated_table_name: str, event_df: DataFrame, event_table_name: str, current_date: str) -> Optional[DataFrame]:
     cumulated_df.createOrReplaceTempView(cumulated_table_name)
     event_df.createOrReplaceTempView(event_table_name)

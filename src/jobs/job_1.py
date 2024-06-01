@@ -34,7 +34,6 @@ def query_1(input_table_name: str) -> str:
 #   output_table_name - the target table of the Spark job, nba_player_scd_merge
 #   input_df - definition of the source table for the Spark Session
 #   output_df - Dataframe containing results of query_1, to be written to nba_player_scd_merge, with overwrite option
-# Having a standalone function (here - job_1()) which creates the output Dataframe allows the query logic to be subjected to unit tests.
 def job_1(spark_session: SparkSession, input_df: DataFrame, input_table_name: str) -> Optional[DataFrame]:
                                                     
     input_df.createOrReplaceTempView(input_table_name)
