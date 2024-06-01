@@ -4,7 +4,7 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_1(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+    <YOUR QUERY HERE>dfa
     """
     return query
 
