@@ -1,7 +1,6 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-from pyspark.sql.functions import *
 
 def query_2(input_table_name: str, base_table: str, date: str) -> str:
     query = f"""
@@ -42,12 +41,8 @@ def job_2(
       spark_session: SparkSession, 
       input_table_name: str,
       base_table: str,
-      date: str,
-      output_table_name: str
+      date: str
 ) -> Optional[DataFrame]:
-  output_df = spark_session.table(output_table_name)
-  output_df.createOrReplaceTempView(output_table_name)
-  # print(query_2(input_table_name, base_table, date))
   return spark_session.sql(query_2(input_table_name, base_table, date))
 
 def main():
