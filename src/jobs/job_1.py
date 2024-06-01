@@ -1,9 +1,61 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    StringType,
+    DoubleType,
+    LongType,
+)
+
+schema = StructType(
+    [
+        StructField("game_id", LongType(), True),
+        StructField("team_id", LongType(), True),
+        StructField("team_abbreviation", StringType(), True),
+        StructField("team_city", StringType(), True),
+        StructField("player_id", LongType(), True),
+        StructField("player_name", StringType(), True),
+        StructField("nickname", StringType(), True),
+        StructField("start_position", StringType(), True),
+        StructField("comment", StringType(), True),
+        StructField("min", StringType(), True),
+        StructField("fgm", DoubleType(), True),
+        StructField("fga", DoubleType(), True),
+        StructField("fg_pct", DoubleType(), True),
+        StructField("fg3m", DoubleType(), True),
+        StructField("fg3a", DoubleType(), True),
+        StructField("fg3_pct", DoubleType(), True),
+        StructField("ftm", DoubleType(), True),
+        StructField("fta", DoubleType(), True),
+        StructField("ft_pct", DoubleType(), True),
+        StructField("oreb", DoubleType(), True),
+        StructField("dreb", DoubleType(), True),
+        StructField("reb", DoubleType(), True),
+        StructField("ast", DoubleType(), True),
+        StructField("stl", DoubleType(), True),
+        StructField("blk", DoubleType(), True),
+        StructField("to", DoubleType(), True),
+        StructField("pf", DoubleType(), True),
+        StructField("pts", DoubleType(), True),
+        StructField("plus_minus", DoubleType(), True),
+    ]
+)
 
 
-def query_1(output_table_name: str) -> str:
+def load_or_create_table(spark_session, table_name):
+    # Check if the table exists
+    if table_name not in spark_session.catalog.listTables():
+        # Create an empty DataFrame with the schema
+        empty_df = spark_session.createDataFrame([], schema)
+
+        # Save the empty DataFrame as a table
+        empty_df.write.mode("overwrite").saveAsTable(table_name)
+    return spark_session.table(table_name)
+
+
+def query_1(input_table_name: str) -> str:
     query = f"""
         --assigns numbers to repeat rows according to first occurrence
         WITH
@@ -17,7 +69,7 @@ def query_1(output_table_name: str) -> str:
                             player_id
                     ORDER BY game_id) AS row_number
                 FROM
-                    {output_table_name}
+                    {input_table_name}
             )
         --select all columns except the row number
         SELECT
@@ -60,16 +112,20 @@ def query_1(output_table_name: str) -> str:
 
 
 def job_1(
-    spark_session: SparkSession, output_table_name: str, dataframe
+    spark_session: SparkSession, input_table_name: str, output_table_name: str
 ) -> Optional[DataFrame]:
-    dataframe.createOrReplaceTempView(output_table_name)
-    return spark_session.sql(query_1(output_table_name))
+    output_df = load_or_create_table(spark_session, output_table_name)
+    output_df.createOrReplaceTempView(output_table_name)
+    return spark_session.sql(query_1(input_table_name))
 
 
 def main():
+    input_table_name: str = "nba_game_details"
     output_table_name: str = "nba_game_details_dedup"
     spark_session: SparkSession = (
         SparkSession.builder.master("local").appName("job_1").getOrCreate()
     )
-    output_df = job_1(spark_session, output_table_name)
-    output_df.write.mode("overwrite").insertInto(output_table_name)
+    output_df = job_1(spark_session, input_table_name, output_table_name)
+    output_df.write.option(
+        "path", spark_session.conf.get("spark.sql.warehouse.dir", "spark-warehouse")
+    ).mode("overwrite").insertInto(output_table_name)

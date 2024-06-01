@@ -1,25 +1,108 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    BooleanType,
+    LongType,
+    StringType,
+)
 
-def query_2(output_table_name: str) -> str:
+schema_output = StructType(
+    [
+        StructField("user_id", LongType(), True),
+        StructField("browser_type", StringType(), True),
+        StructField("history_int", LongType(), True),
+        StructField("history_in_binary", StringType(), True),
+    ]
+)
+
+
+def load_or_create_table(spark_session, table_name):
+    # Check if the table exists
+    if table_name not in spark_session.catalog.listTables():
+        # Create an empty DataFrame with the schema
+        empty_df = spark_session.createDataFrame([], schema_output)
+
+        # Save the empty DataFrame as a table
+        empty_df.write.mode("overwrite").saveAsTable(table_name)
+    return spark_session.table(table_name)
+
+
+def query_2(input_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+    WITH
+    today AS (
+        SELECT
+            *
+        FROM
+            {input_table_name}
+        WHERE
+            date = DATE('2023-01-06')
+    ),
+    date_list_int AS (
+        SELECT
+            user_id,
+            browser_type,
+            CAST(
+                SUM(
+                    CASE
+                    --if the active on that date, add 2^(index of date in list)
+                        WHEN array_contains_date(dates_active, sequence_date) THEN POW(2, 30 - DATE_DIFF(DAY, sequence_date, date))
+                        ELSE 0
+                    END
+                ) AS BIGINT
+            ) AS history_int
+        FROM
+            today
+            --gives list of all possible active dates that could be included in sum
+            CROSS JOIN explode (SEQUENCE(DATE('2023-01-01'), DATE('2023-01-07'))) AS t (sequence_date)
+        GROUP BY
+            user_id,
+            browser_type
+    )
+SELECT
+    *,
+    --convert integer back to binary
+    int_to_binary(history_int) AS history_in_binary
+FROM
+    date_list_int
+ORDER BY user_id
     """
     return query
 
-def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
-  output_df = spark_session.table(output_table_name)
-  output_df.createOrReplaceTempView(output_table_name)
-  return spark_session.sql(query_2(output_table_name))
+
+# Define the UDF
+def int_to_binary(integer):
+    return bin(integer)[2:]  # Convert to binary and remove the '0b' prefix
+
+
+# Define the UDF
+def array_contains_date(dates, date_to_check):
+    return date_to_check in dates
+
+
+def job_2(
+    spark_session: SparkSession, input_table_name: str, output_table_name: str
+) -> Optional[DataFrame]:
+    # Register the UDF
+    spark_session.udf.register("int_to_binary", int_to_binary, StringType())
+    spark_session.udf.register(
+        "array_contains_date", array_contains_date, BooleanType()
+    )
+    output_df = load_or_create_table(spark_session, output_table_name)
+    output_df.createOrReplaceTempView(output_table_name)
+    return spark_session.sql(query_2(input_table_name))
+
 
 def main():
-    output_table_name: str = "<output table name here>"
+    input_table_name: str = "devices_history"
+    output_table_name: str = "history_date_list_int"
     spark_session: SparkSession = (
-        SparkSession.builder
-        .master("local")
-        .appName("job_2")
-        .getOrCreate()
+        SparkSession.builder.master("local").appName("job_2").getOrCreate()
     )
-    output_df = job_2(spark_session, output_table_name)
-    output_df.write.mode("overwrite").insertInto(output_table_name)
+    output_df = job_2(spark_session, input_table_name, output_table_name)
+    output_df.write.option(
+        "path", spark_session.conf.get("spark.sql.warehouse.dir", "spark-warehouse")
+    ).mode("overwrite").insertInto(output_table_name)
