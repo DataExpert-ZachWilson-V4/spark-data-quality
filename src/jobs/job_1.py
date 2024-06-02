@@ -38,7 +38,7 @@ SELECT
     WHEN ts.year IS NOT NULL
     AND ls.films IS NULL THEN ts.films
     WHEN ts.year IS NOT NULL
-    AND ls.films IS NOT NULL THEN CONCAT(ts.films,ls.films)
+    AND ls.films IS NOT NULL THEN ts.films || ls.films
   END AS films,
   coalesce(
     CASE
