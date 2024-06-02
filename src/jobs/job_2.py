@@ -9,12 +9,12 @@ def query_2(output_table_name: str) -> str:
   game_id, team_id, player_id,
   row_number() over (partition by game_id, team_id, player_id) as row_count
   from
-  bootcamp.nba_game_details
+  derekleung.nba_game_details
   )
 --Step 2: Note for every row in the CTE above with row_count > 1 is a duplicate according to our filtering criteria
 --So we could use a WHERE clause to take them out
 select 
-  game_id, team_id, player_id,row_count
+  game_id, team_id, player_id, row_count
 from
   rn_cte
 where
