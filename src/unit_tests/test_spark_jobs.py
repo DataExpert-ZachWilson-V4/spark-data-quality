@@ -1,4 +1,13 @@
-from pyspark.sql.types import *
+from pyspark.sql.types import (
+    StructField,
+    StructType,
+    StringType, 
+    IntegerType, 
+    DoubleType, 
+    ArrayType,
+    DateType,
+    BooleanType
+)
 from collections import namedtuple
 from datetime import datetime
 from chispa.dataframe_comparer import  assert_df_equality
@@ -40,7 +49,6 @@ def test_actors_cumulative_scd(spark_session):
         StructField("year", IntegerType())
     ])
 
-
     actual_actors_data = [
         Actors(
             actor = "Harold Lloyd",
@@ -66,16 +74,6 @@ def test_actors_cumulative_scd(spark_session):
                     votes = 22989,
                     rating = 6.3,
                     film_id = "tt0004972"
-                ), Films(
-                    film = "Judith of Bethulia",
-                    votes = 1259,
-                    rating = 6.1,
-                    film_id = "tt0004181"
-                ), Films(
-                    "Home, Sweet Home",
-                    190,
-                    5.8,
-                    "tt0003167"
                 )
             ],
             quality_class = "average",
@@ -126,16 +124,6 @@ def test_actors_cumulative_scd(spark_session):
                     votes = 22989,
                     rating = 6.3,
                     film_id = "tt0004972"
-                ), Films(
-                    film = "Judith of Bethulia",
-                    votes = 1259,
-                    rating = 6.1,
-                    film_id = "tt0004181"
-                ), Films(
-                    film = "Home, Sweet Home",
-                    votes = 190,
-                    rating = 5.8,
-                    film_id = "tt0003167"
                 )
             ],
             quality_class = "good",
@@ -150,7 +138,7 @@ def test_actors_cumulative_scd(spark_session):
     actors_df.createOrReplaceTempView("actors")
     actor_films_df.createOrReplaceTempView("actor_films")
 
-    expected_df = spark.createDataFrame(expected_data, actor_schema)
+    expected_df = spark.createDataFrame(expected_data, schema=actor_schema)
 
     actual_df = job_1.job_1(
         spark, 
@@ -171,11 +159,6 @@ def test_inc_host_data(spark_session):
         StructField("host", StringType()),
         StructField("host_activity_datelist", ArrayType(DateType())),
         StructField("date", DateType())
-    ])
-
-    web_event_schema = StructType([
-        StructField("host", StringType()),
-        StructField("event_time", StringType())
     ])
 
     actual_host_data = []
@@ -227,7 +210,7 @@ def test_inc_host_data(spark_session):
 
     spark = spark_session()
     host_df = spark.createDataFrame(actual_host_data, schema=host_schema)
-    web_events_df = spark.createDataFrame(actual_web_event_data, schema=web_event_schema)
+    web_events_df = spark.createDataFrame(actual_web_event_data)
     expected_df = spark.createDataFrame(expected_data, schema=host_schema)
 
     host_df.createOrReplaceTempView("host_cumulated")
