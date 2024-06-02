@@ -20,12 +20,8 @@ schema_output = StructType(
 
 
 def load_or_create_table(spark_session, table_name):
-    # Check if the table exists
     if table_name not in spark_session.catalog.listTables():
-        # Create an empty DataFrame with the schema
         empty_df = spark_session.createDataFrame([], schema_output)
-
-        # Save the empty DataFrame as a table
         empty_df.write.mode("overwrite").saveAsTable(table_name)
     return spark_session.table(table_name)
 
@@ -48,7 +44,6 @@ def query_2(input_table_name: str) -> str:
             CAST(
                 SUM(
                     CASE
-                    --if the active on that date, add 2^(index of date in list)
                         WHEN array_contains_date(dates_active, sequence_date) THEN POW(2, 30 - DATE_DIFF(DAY, sequence_date, date))
                         ELSE 0
                     END
@@ -56,7 +51,6 @@ def query_2(input_table_name: str) -> str:
             ) AS history_int
         FROM
             today
-            --gives list of all possible active dates that could be included in sum
             CROSS JOIN explode (SEQUENCE(DATE('2023-01-01'), DATE('2023-01-07'))) AS t (sequence_date)
         GROUP BY
             user_id,
@@ -64,7 +58,6 @@ def query_2(input_table_name: str) -> str:
     )
 SELECT
     *,
-    --convert integer back to binary
     int_to_binary(history_int) AS history_in_binary
 FROM
     date_list_int
@@ -73,9 +66,8 @@ ORDER BY user_id
     return query
 
 
-# Define the UDF
 def int_to_binary(integer):
-    return bin(integer)[2:]  # Convert to binary and remove the '0b' prefix
+    return bin(integer)[2:]
 
 
 # Define the UDF
@@ -86,7 +78,6 @@ def array_contains_date(dates, date_to_check):
 def job_2(
     spark_session: SparkSession, input_table_name: str, output_table_name: str
 ) -> Optional[DataFrame]:
-    # Register the UDF
     spark_session.udf.register("int_to_binary", int_to_binary, StringType())
     spark_session.udf.register(
         "array_contains_date", array_contains_date, BooleanType()

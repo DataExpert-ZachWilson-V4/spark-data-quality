@@ -29,19 +29,14 @@ schema = StructType(
 
 
 def load_or_create_table(spark_session, table_name):
-    # Check if the table exists
     if table_name not in spark_session.catalog.listTables():
-        # Create an empty DataFrame with the schema
         empty_df = spark_session.createDataFrame([], schema)
-
-        # Save the empty DataFrame as a table
         empty_df.write.mode("overwrite").saveAsTable(table_name)
     return spark_session.table(table_name)
 
 
 def query_1(input_table_name: str) -> str:
     query = f"""
-        --assigns numbers to repeat rows according to first occurrence
         WITH
             row_nums AS (
                 SELECT
@@ -55,7 +50,6 @@ def query_1(input_table_name: str) -> str:
                 FROM
                     {input_table_name}
             )
-        --select all columns except the row number
         SELECT
             game_id,
             team_id,
@@ -72,7 +66,6 @@ def query_1(input_table_name: str) -> str:
             fg_pct
         FROM
             row_nums
-        --keep only the first occurrence for duplicate records
         WHERE
             row_number = 1
     """

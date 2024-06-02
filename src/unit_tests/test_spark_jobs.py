@@ -1,8 +1,5 @@
 from chispa.dataframe_comparer import *
-import shutil
-import os
 import pytest
-import time
 from datetime import datetime
 from pyspark.sql import SparkSession
 from ..jobs.job_1 import job_1
@@ -94,7 +91,6 @@ def test_game_details_dedupe(spark):
     )
 
     input_dataframe = spark.createDataFrame(input_data, schema=schema)
-    # Register the DataFrame as a table in the Spark catalog
     input_table_name = "nba_game_details"
 
     input_dataframe.write.option(
