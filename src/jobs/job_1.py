@@ -17,7 +17,7 @@ def query_1(output_table_name: str) -> str:
     SELECT
       a.actor,
       a.actor_id,
-      array_agg(row(a.film, a.votes, a.rating, a.film_id)) AS films,
+      COLLECT_LIST(ARRAY(a.film, a.votes, a.rating, a.film_id)) AS films,
       avg(a.rating) AS avg_rating,
       avg(a.votes) AS avg_votes,
       a.YEAR
@@ -38,7 +38,7 @@ SELECT
     WHEN ts.year IS NOT NULL
     AND ls.films IS NULL THEN ts.films
     WHEN ts.year IS NOT NULL
-    AND ls.films IS NOT NULL THEN ts.films || ls.films
+    AND ls.films IS NOT NULL THEN CONCAT(ts.films,ls.films)
   END AS films,
   coalesce(
     CASE
