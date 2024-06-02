@@ -14,23 +14,19 @@ devices_cumulated = namedtuple(
 actor_films = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
 actor = namedtuple("Actor", "actor actor_id films quality_class is_active current_year")
 
-
 def test_devices_cumulated_table(spark):
     # unit tests
     #  - for input tables if in web_event and data_devices the event happened in the date other than 2023-01-02
     #  - for input data_devices_cumulated if user id is None and if browser_type is None
 
-    # creating fake input for devices table
     input_data_devices = [
         devices(-1138341683, "Chrome", [date(2023, 1, 2)], 1),
         devices(1967566123, "Safari", [date(2023, 1, 2)], 2),
         devices(328474741, "Mobile Safari", [date(2022, 12, 31)], 3),
     ]
-    # generating the devices data based on the fake input
     fake_devices_df = spark.createDataFrame(input_data_devices)
     fake_devices_df.createOrReplaceTempView("devices")
 
-    # creating fake input for web_events table
     input_data_web_events = [
         web_events(
             1967566579,
@@ -57,17 +53,13 @@ def test_devices_cumulated_table(spark):
             "2022-12-31 08:01:51.009 UTC",
         ),
     ]
-
-    # generating the web events data based on the fake input
     fake_web_events_df = spark.createDataFrame(input_data_web_events)
     fake_web_events_df.createOrReplaceTempView("web_events")
 
-    # creating fake input for user_devices_cumulated table
     input_data_devices_cumulated = [
         devices_cumulated(1967566579, "Chrome", [date(2023, 1, 1)], date(2023, 1, 1)),
         devices_cumulated(1041379120, None, [date(2023, 1, 1)], date(2023, 1, 1)),
     ]
-
     devices_cumulated_df = spark.createDataFrame(input_data_devices_cumulated)
     devices_cumulated_df.createOrReplaceTempView("devices_cumulated")
 
@@ -88,13 +80,11 @@ def test_devices_cumulated_table(spark):
     # verifying that the dataframes are identical
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
 
-
 def test_actors_table(spark):
     # unit tests
     #  - for input actor_films if year is not current_year+1
     #  - for input actors_df if last year films is not null and this year film is not null (Uma Thurman)
 
-    # creating fake input for actor_films table
     input_data_actor_films = [
         actor_films(
             "Uma Thurman",
@@ -124,11 +114,9 @@ def test_actors_table(spark):
             "tt0112578",
         ),
     ]
-    # generating the actor_films data based on the fake input
     fake_actor_films_df = spark.createDataFrame(input_data_actor_films)
     fake_actor_films_df.createOrReplaceTempView("actor_films")
 
-    # creating fake input for actors table
     input_data_actors = [
         actor(
             "Uma Thurman",
@@ -147,7 +135,6 @@ def test_actors_table(spark):
             current_year,
         )
     ]
-    # generating the actors data based on the fake input
     fake_actors_df = spark.createDataFrame(input_data_actors)
     fake_actors_df.createOrReplaceTempView("actors")
 
