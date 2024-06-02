@@ -18,7 +18,7 @@ def query_1(output_table_name: str) -> str:
                 actor,
                 actor_id,
                 year AS current_year,
-                COLLECT_LIST(NAMED_STRUCT("film", film, "votes", votes, "rating", rating, "film_id", film_id)) AS films,
+                COLLECT_LIST(STRUCT("film", film, "votes", votes, "rating", rating, "film_id", film_id)) AS films,
                 AVG(rating) AS rating
             FROM actor_films
             WHERE year = 1929
