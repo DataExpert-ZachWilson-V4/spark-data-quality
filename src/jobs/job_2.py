@@ -4,7 +4,53 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_2(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+    with
+    cte as (
+        select
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY
+                    game_id,
+                    team_id,
+                    player_id
+            ) as dup
+        from
+            bootcamp.nba_game_details
+    )
+    select
+        game_id,
+        team_id,
+        team_abbreviation,
+        team_city,
+        player_id,
+        player_name,
+        nickname,
+        start_position,
+        comment,
+        min,
+        fgm,
+        fga,
+        fg_pct,
+        fg3m,
+        fg3a,
+        fg3_pct,
+        ftm,
+        fta,
+        ft_pct,
+        oreb,
+        dreb,
+        reb,
+        ast,
+        stl,
+        blk,
+        to,
+        pf,
+        pts,
+        plus_minus
+    from
+        cte
+    where
+        dup = 1
     """
     return query
 
