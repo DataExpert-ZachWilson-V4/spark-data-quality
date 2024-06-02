@@ -4,36 +4,7 @@ from pyspark.sql.dataframe import DataFrame
 from datetime import datetime, timedelta
 
 def query_2(output_table_name: str, date_to_load: str) -> str:
-    query = f"""
-    WITH previous AS(
-        SELECT *
-        FROM user_devices_cumulated
-        WHERE -- yesterday's date
-            date = DATE('{(datetime.strptime(date_to_load, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')}')
-    ),
-    now AS (
-        -- today's data with date extracted and deduped
-        SELECT user_id,
-            browser_type,
-            DATE(date_trunc('day', event_time)) AS event_date
-        FROM web_events we
-            JOIN devices d ON d.device_id = we.device_id
-        WHERE DATE(date_trunc('day', event_time)) = DATE('{date_to_load}')
-        GROUP BY user_id,
-            browser_type,
-            DATE(date_trunc('day', event_time))
-    )
-    SELECT COALESCE(p.user_id, n.user_id) AS user_id,
-        COALESCE(p.browser_type, n.browser_type) AS browser_type,
-        CASE
-            WHEN p.dates_active is NULL THEN array(n.event_date)
-            ELSE concat(array(n.event_date), p.dates_active)
-        END AS dates_active,
-        DATE('{date_to_load}') AS date
-    FROM previous p
-        FULL OUTER JOIN now n ON p.user_id = n.user_id
-        AND p.browser_type = n.browser_type
-    """
+    query = f"""WITH previous AS (SELECT * FROM user_devices_cumulated WHERE date = DATE('{(datetime.strptime(date_to_load, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')}')), now AS (SELECT user_id, browser_type, DATE(date_trunc('day', event_time)) AS event_date FROM web_events we JOIN devices d ON d.device_id = we.device_id WHERE DATE(date_trunc('day', event_time)) = DATE('{date_to_load}') GROUP BY user_id, browser_type, DATE(date_trunc('day', event_time))) SELECT COALESCE(p.user_id, n.user_id) AS user_id, COALESCE(p.browser_type, n.browser_type) AS browser_type, CASE WHEN p.dates_active is NULL THEN array(n.event_date) ELSE concat(array(n.event_date), p.dates_active) END AS dates_active, DATE('{date_to_load}') AS date FROM previous p FULL OUTER JOIN now n ON p.user_id = n.user_id AND p.browser_type = n.browser_type"""
     return query
 
 def job_2(spark_session: SparkSession, output_table_name: str, date_to_load: str) -> Optional[DataFrame]:
