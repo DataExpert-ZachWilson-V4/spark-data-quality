@@ -44,14 +44,3 @@ def job_2(
       date: str
 ) -> Optional[DataFrame]:
   return spark_session.sql(query_2(input_table_name, base_table, date))
-
-def main():
-    output_table_name: str = "<output table name here>"
-    spark_session: SparkSession = (
-        SparkSession.builder
-        .master("local")
-        .appName("job_2")
-        .getOrCreate()
-    )
-    output_df = job_2(spark_session, output_table_name)
-    output_df.write.mode("overwrite").insertInto(output_table_name)

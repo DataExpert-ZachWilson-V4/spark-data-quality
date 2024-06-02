@@ -70,25 +70,3 @@ def job_1(spark_session: SparkSession,
           current_year: int
 )-> Optional[DataFrame]:
   return spark_session.sql(query_1(input_table_name, base_table, current_year))
-
-def main():
-    input_table_name = "sundeep.actors"
-    base_table = "bootcamp.actor_films"
-    current_year = 1915
-    output_table_name: str = input_table_name
-    spark_session: SparkSession = (
-        SparkSession.builder
-        .master("local")
-        .appName("job_1")
-        .getOrCreate()
-    )
-    output_df = job_1(
-       spark_session, 
-       input_table_name,
-       base_table,
-       current_year
-    )
-    output_df.write.mode("append").insertInto(output_table_name)
-
-if __name__ == "__main__":
-   main()
