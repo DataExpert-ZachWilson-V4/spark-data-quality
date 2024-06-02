@@ -10,7 +10,6 @@ def spark():
     spark = SparkSession.builder.master("local[1]").appName("yavuz_unit_test").getOrCreate()
     yield spark
     spark.stop()
-
 @pytest.fixture(scope="function")
 def actors_table(spark):
     data = [
@@ -30,7 +29,6 @@ def actors_table(spark):
     actors_df.createOrReplaceTempView("actors")
     yield actors_df
     spark.catalog.dropTempView("actors")
-
 @pytest.fixture(scope="function")
 def web_events_table(spark):
     data = [
@@ -55,7 +53,6 @@ def web_events_table(spark):
     web_events_df.createOrReplaceTempView("web_events")
     yield web_events_df
     spark.catalog.dropTempView("web_events")
-
 @pytest.fixture(scope="function")
 def user_devices_cumulated_table(spark):
     schema = schema = StructType([
@@ -64,14 +61,10 @@ def user_devices_cumulated_table(spark):
         StructField('dates_active', ArrayType(DateType(), True), True),
         StructField('date', DateType(), True)
         ])
-    
-    # Create an empty DataFrame with the schema
     user_devices_cumulated_df = spark.createDataFrame([], schema)
-    # Insert the initial empty DataFrame into the managed table
     user_devices_cumulated_df.createOrReplaceTempView("user_devices_cumulated")
     yield user_devices_cumulated_df
     spark.catalog.dropTempView("user_devices_cumulated")
-
 @pytest.fixture(scope="function")
 def devices_table(spark):
     data = [
@@ -87,12 +80,8 @@ def devices_table(spark):
     devices_df.createOrReplaceTempView("devices")
     yield devices_df
     spark.catalog.dropTempView("devices")
-    
-
 def test_job_1(spark, actors_table):
-
     actual = job_1(spark, "actors")
-
     expected_data = [
         ("Gloria Swanson", "nm0841797", "bad", True, 1918, 1918, 1921),
         ("Gloria Swanson", "nm0841797", "average", True, 1919, 1919, 1921),
@@ -103,11 +92,8 @@ def test_job_1(spark, actors_table):
     ]
     expected_schema = ["actor", "actor_id", "quality_class", "is_active", "start_date", "end_date", "current_year"]
     expected_df = spark.createDataFrame(data=expected_data, schema=expected_schema)
-
     assert actual.collect() == expected_df.collect()
-
 def test_job_2(spark, web_events_table, devices_table, user_devices_cumulated_table):
-
     actual = job_2(spark, "user_devices_cumulated", "2023-01-01")
     expected_data = [
         ('user002', 'chrome', ['2023-01-01'], '2023-01-01'),
@@ -120,6 +106,5 @@ def test_job_2(spark, web_events_table, devices_table, user_devices_cumulated_ta
         .withColumn("dates_active", array(to_date(col("dates_active")[0], 'yyyy-MM-dd')))\
         .withColumn("date", to_date(col("date"), 'yyyy-MM-dd'))    
     assert actual.collect() == expected_df.collect()
-
 if __name__ == "__main__":
     pytest.main(["-s", __file__])
