@@ -4,47 +4,21 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_2(output_table_name: str) -> str:
     query = f"""
-    WITH
-  yesterday AS (
-    SELECT
-      *
-    FROM
-      derekleung.web_users_cumulated
-    WHERE
-      DATE = DATE('2023-01-02')
-  ),
-  today AS (
-    SELECT
-      we.user_id,
-  --browser_type: taken from derekleung.devices
-      d.browser_type,
-  --use date_trunc to get only date instead of full timestamp
-      CAST(date_trunc('day', we.event_time) AS DATE) AS event_date,
-      COUNT(1)
-    FROM
-      derekleung.web_events we
-    JOIN
-      derekleung.devices d
-    ON
-      we.device_id = d.device_id
-    WHERE
-      date_trunc('day', we.event_time) = DATE('2023-01-03')
-    GROUP BY
-      we.user_id,
-      d.browser_type,
-      CAST(date_trunc('day', we.event_time) AS DATE)
+    with rn_cte as(
+  select
+  game_id, team_id, player_id,
+  row_number() over (partition by game_id, team_id, player_id) as row_count
+  from
+  bootcamp.nba_game_details
   )
-SELECT
-  COALESCE(y.user_id, t.user_id) AS user_id,
-  COALESCE(y.browser_type, t.browser_type) AS browser_type,
-  CASE
-    WHEN y.dates_active IS NOT NULL THEN ARRAY[t.event_date] || y.dates_active
-    ELSE ARRAY[t.event_date]
-  END AS dates_active,
-  DATE('2023-01-03') AS DATE
-FROM
-  yesterday y
-  FULL OUTER JOIN today t ON y.user_id = t.user_id
+--Step 2: Note for every row in the CTE above with row_count > 1 is a duplicate according to our filtering criteria
+--So we could use a WHERE clause to take them out
+select 
+  game_id, team_id, player_id,row_count
+from
+  rn_cte
+where
+  row_count = 1
     """
     return query
 
@@ -54,7 +28,7 @@ def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_2(output_table_name))
 
 def main():
-    output_table_name: str = "web_users_cumulated"
+    output_table_name: str = "nba_game_details_deduped"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
