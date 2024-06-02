@@ -1,14 +1,14 @@
 import pytest
 from pyspark.sql import SparkSession
 
-def spark_session_factory(app_name: str) -> SparkSession:
+def spark_session_factory(app_name: str = "chispa") -> SparkSession:
   return (
       SparkSession.builder
       .master("local")
-      .appName("chispa")
+      .appName(app_name)
       .getOrCreate()
   )
 
 @pytest.fixture(scope='session')
 def spark_session():
-    return spark_session_factory
+    return spark_session_factory()
