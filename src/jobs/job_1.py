@@ -9,7 +9,7 @@ def query_1(output_table_name: str) -> str:
     SELECT
       *
     FROM
-      abhishekshetty.actors
+      {output_table_name}
     WHERE
       current_year = 1928
   ),
@@ -65,7 +65,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_1(output_table_name))
 
 def main():
-    output_table_name: str = "abhishekshetty.actors"
+    output_table_name: str = "actors"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
