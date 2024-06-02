@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 def query_2(output_table_name: str, date_to_load: str) -> str:
     query = f"""
-    -- This needs to be inserted to cumulated table for each year
     WITH previous AS(
         SELECT *
         FROM user_devices_cumulated
@@ -23,7 +22,7 @@ def query_2(output_table_name: str, date_to_load: str) -> str:
         GROUP BY user_id,
             browser_type,
             DATE(date_trunc('day', event_time))
-    ) -- cumulate the table, coalesce non cumulated fields, and use conditions for cumulated data
+    )
     SELECT COALESCE(p.user_id, n.user_id) AS user_id,
         COALESCE(p.browser_type, n.browser_type) AS browser_type,
         CASE

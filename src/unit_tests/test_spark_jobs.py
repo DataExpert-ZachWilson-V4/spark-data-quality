@@ -109,21 +109,16 @@ def test_job_1(spark, actors_table):
 def test_job_2(spark, web_events_table, devices_table, user_devices_cumulated_table):
 
     actual = job_2(spark, "user_devices_cumulated", "2023-01-01")
-
-    # Create the data
     expected_data = [
         ('user002', 'chrome', ['2023-01-01'], '2023-01-01'),
         ('user001', 'chrome', ['2023-01-01'], '2023-01-01'),
         ('user002', 'ie', ['2023-01-01'], '2023-01-01')
     ]
     expected_schema = ["user_id", "browser_type", "dates_active", "date"]
-    # Create the DataFrame
     expected_df_not_transformed = spark.createDataFrame(expected_data, expected_schema)
-
-    # Convert string dates to DateType
-    expected_df = expected_df_not_transformed.withColumn("dates_active", array(to_date(col("dates_active")[0], 'yyyy-MM-dd')))\
+    expected_df = expected_df_not_transformed\
+        .withColumn("dates_active", array(to_date(col("dates_active")[0], 'yyyy-MM-dd')))\
         .withColumn("date", to_date(col("date"), 'yyyy-MM-dd'))    
-
     assert actual.collect() == expected_df.collect()
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_1(output_table_name: str) -> str:
     query = f"""
-    WITH -- getting the previous years quality_class with LAG function, to make the ready for the newxt aggregation query
+    WITH 
     lagged AS (
         SELECT actor,
             actor_id,
@@ -15,10 +15,9 @@ def query_1(output_table_name: str) -> str:
             ) AS quality_class_last_year,
             is_active,
             current_year
-        FROM actors -- loading data form the current date 1921 to backwards
+        FROM actors
         WHERE current_year <= 1921
     ),
-    -- we are defining if the quality class changed. We are summing them. Only tha changed one will be incremented by 1, and eventually we are aggregating to get start and end date.
     changed AS (
         SELECT *,
             SUM(
