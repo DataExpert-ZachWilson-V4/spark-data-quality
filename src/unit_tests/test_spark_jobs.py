@@ -14,8 +14,7 @@ def to_dt(time_str: str, is_date: bool=False) -> datetime:
 
 def test_job_one(spark_session) -> None:
 
-    # set up values
-    # mock data for input tables
+    # set up values mock data for input tables
     # events table - testing with one user 2116161230
     events = [
       {"user_id": 2116161230, "device_id": 1324700293, "host": "a", "event_time": to_dt("2023-08-14 12:54:05 UTC")},
@@ -61,8 +60,7 @@ def test_job_one(spark_session) -> None:
 
 def test_job_two(spark_session) -> None:
 
-    # set up values
-    # mock data for input tables
+    # set up values mock data for input tables
     # actor_films table - testing with two actors in 1914 Lillian Gish, Harold Lloyd
     actor_films = [
       {

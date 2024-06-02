@@ -19,7 +19,7 @@ def query_1(
     query = f"""
     WITH yesterday_history AS (
         SELECT *
-        FROM {output_table_name} --user_devices_cumulated
+        FROM {output_table_name}
         WHERE DATE = DATE('{last_date}')
 
     ), today_history AS (
@@ -29,20 +29,17 @@ def query_1(
             DATE('{current_date}') AS todays_date,
             -- activity logged dates
             ARRAY_AGG(DATE(event_time)) AS event_date
-        FROM {events_input} web --bootcamp.web_events
-        LEFT JOIN {devices_input} d --bootcamp.devices
+        FROM {events_input} web
+        LEFT JOIN {devices_input} d
             ON web.device_id = d.device_id
         WHERE DATE(web.event_time) = DATE('{current_date}')
-        -- we only care if a date appears, not how many times
         GROUP BY 1, 2, 3
 
     )
     SELECT
         COALESCE(yh.user_id, th.user_id) AS user_id,
         COALESCE(yh.browser_type, th.browser_type) AS browser_type,
-        -- append today's date to event date history
         CASE
-            -- order by most recent
             WHEN yh.user_id IS NULL AND th.todays_date IS NOT NULL
                 THEN ARRAY((th.todays_date))
             WHEN yh.dates_active IS NOT NULL AND th.todays_date IS NOT NULL
