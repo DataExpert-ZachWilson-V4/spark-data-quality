@@ -44,52 +44,20 @@ def test_job_one(spark_session) -> None:
     expected_user_devices_df.createOrReplaceTempView("mock_user_devices")
 
    # test the job_1 function with the inputs given
-    actual_user_devices_df = job_1(
-      spark_session=spark_session,
-      events_input_table_name="mock_events",
-      devices_input_table_name="mock_devices",
-      output_table_name="mock_user_devices",
-      current_date='2023-08-14'
-    )
+    actual_user_devices_df = job_1(spark_session, "mock_events", "mock_devices", "mock_user_devices", '2023-08-14')
 
     compare_df = expected_user_devices_df.exceptAll(actual_user_devices_df)
     assert compare_df.count() == 0, \
-        f"User devices don't match. \nExpected: {expected_user_devices_df.show()}" + \
-            f"\nActual: {actual_user_devices_df.show()}"
+        f"User devices don't match. \nExpected: {expected_user_devices_df.show()} \nActual: {actual_user_devices_df.show()}"
 
 
 def test_job_two(spark_session) -> None:
-
     # set up values mock data for input tables
     # actor_films table - testing with two actors in 1914 Lillian Gish, Harold Lloyd
     actor_films = [
-      {
-        "actor": "Lillian Gish",
-        "actor_id": "nm0001273",
-        "film": "Romola",
-        "year": 1924,
-        "votes": 165,
-        "rating": 6.2,
-        "film_id": "tt0015289"
-      },
-      {
-        "actor": "Harold Lloyd",
-        "actor_id": "nm0516001",
-        "film": "Girl Shy",
-        "year": 1924,
-        "votes": 3138,
-        "rating": 7.7,
-        "film_id": "tt0014945"
-      },
-      {
-        "actor": "Harold Lloyd",
-        "actor_id": "nm0516001",
-        "film": "Hot Water",
-        "year": 1924,
-        "votes": 1258,
-        "rating": 7.1,
-        "film_id": "tt0015002"
-      },
+      {"actor": "Lillian Gish", "actor_id": "nm0001273", "film": "Romola", "year": 1924, "votes": 165, "rating": 6.2, "film_id": "tt0015289"},
+      {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "Girl Shy", "year": 1924, "votes": 3138, "rating": 7.7,"film_id": "tt0014945"},
+      {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "Hot Water", "year": 1924, "votes": 1258, "rating": 7.1, "film_id": "tt0015002"},
     ]
     actor_films_df = spark_session.createDataFrame(actor_films)
     actor_films_df.createOrReplaceTempView("mock_actor_films")
@@ -120,17 +88,11 @@ def test_job_two(spark_session) -> None:
     print("we made it past making the mock input table")
 
     # test the job_2 function with the inputs given
-    actual_actors_history_df = job_2(
-      spark_session=spark_session,
-      input_table_name="mock_actor_films",
-      output_table_name="mock_actors_history",
-      load_year=1924
-    )
+    actual_actors_history_df = job_2(spark_session, "mock_actor_films", "mock_actors_history", 1924)
 
     compare_df = expected_actors_history_df.exceptAll(actual_actors_history_df)
     assert compare_df.count() == 0, \
-        f"Actor history records don't match. \nExpected: {expected_actors_history_df.show()}" + \
-        f"\nActual: {actual_actors_history_df.show()}"
+        f"Actor history mismatch. \nExpected: {expected_actors_history_df.show()} \nActual: {actual_actors_history_df.show()}"
 
 if __name__ == "__main__":
     pytest.main([__file__])

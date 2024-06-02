@@ -4,12 +4,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
 
-def query_1(
-      events_input: str,
-      devices_input: str,
-      output_table_name: str,
-      current_date: str
-    ) -> str:
+def query_1(events_input: str, devices_input: str, output_table_name: str, current_date: str) -> str:
 
     # get previous dt
     dt = datetime.strptime(current_date, "%Y-%m-%d")
@@ -21,7 +16,6 @@ def query_1(
         SELECT *
         FROM {output_table_name}
         WHERE DATE = DATE('{last_date}')
-
     ), today_history AS (
         SELECT
             user_id,
@@ -34,7 +28,6 @@ def query_1(
             ON web.device_id = d.device_id
         WHERE DATE(web.event_time) = DATE('{current_date}')
         GROUP BY 1, 2, 3
-
     )
     SELECT
         COALESCE(yh.user_id, th.user_id) AS user_id,
@@ -56,7 +49,7 @@ def query_1(
     return query
 
 def job_1(
-      spark_session: SparkSession,
+spark_session: SparkSession,
       events_input_table_name: str,
       devices_input_table_name: str,
       output_table_name: str,
@@ -64,20 +57,14 @@ def job_1(
     ) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)
-  return spark_session.sql(
-     query_1(events_input_table_name, devices_input_table_name, output_table_name, current_date)
-    )
+  return spark_session.sql(query_1(events_input_table_name, devices_input_table_name, output_table_name, current_date))
 
 def main():
-    events_input_table_name = "web_events"
-    devices_input_table_name = "user_devices"
-    output_table_name: str = "user_devices_cumulated"
-    current_date: str = '2023-08-14'
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
         .appName("job_1")
         .getOrCreate()
     )
-    output_df = job_1(spark_session, events_input_table_name, devices_input_table_name, output_table_name, current_date)
-    output_df.write.mode("overwrite").insertInto(output_table_name)
+    output_df = job_1(spark_session, "web_events", "user_devices", "user_devices_cumulated", "2023-08-14")
+    output_df.write.mode("overwrite").insertInto("user_devices_cumulated")

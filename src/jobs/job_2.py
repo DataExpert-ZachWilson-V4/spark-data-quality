@@ -2,13 +2,8 @@ from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-def query_2(
-      input_table_name: str,
-      output_table_name: str,
-      current_year: int
-    ) -> str:
+def query_2(input_table_name: str, output_table_name: str, current_year: int) -> str:
     query = f"""
-    -- Increment to 1914
     WITH last_year AS (
         SELECT *
         FROM {output_table_name}
@@ -53,23 +48,17 @@ def query_2(
     """
     return query
 
-def job_2(
-      spark_session: SparkSession,
-      input_table_name: str,
-      output_table_name: str,
-      load_year: int
-    ) -> Optional[DataFrame]:
+def job_2(spark_session: SparkSession, input_table_name: str, output_table_name: str, load_year: int) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_2(input_table_name, output_table_name, load_year))
 
 def main():
-    load_year: int = 1914
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
         .appName("job_2")
         .getOrCreate()
     )
-    output_df = job_2(spark_session, "actor_films", "actors", load_year)
+    output_df = job_2(spark_session, "actor_films", "actors", 1914)
     output_df.write.mode("overwrite").insertInto("actors")
