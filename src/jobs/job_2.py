@@ -3,16 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
 def query_2(output_table_name: str) -> str:
-    """
-    Constructs a SQL query to merge data from two sets of host activities (yesterday and today) into a specified table.
-    This operation uses complex SQL operations to update the dataset based on activity data.
-
-    Args:
-    output_table_name (str): The table to which the merged data is inserted or updated.
-
-    Returns:
-    str: A SQL merge query formatted to execute with Spark SQL capabilities.
-    """
+    
     query = f"""
     WITH yesterday AS ( 
         SELECT host, host_activity_datelist, date
@@ -44,17 +35,6 @@ def query_2(output_table_name: str) -> str:
     return query
 
 def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
-    """
-    Executes a SQL query that handles merging data from different dates into a single table.
-    This job is critical for maintaining up-to-date and comprehensive records of host activities.
-
-    Args:
-    spark_session (SparkSession): The active Spark session to execute the job.
-    output_table_name (str): The table that will be updated with the new merged data.
-
-    Returns:
-    DataFrame: The result of the SQL query, primarily for verification or additional processing.
-    """
     output_df = spark_session.sql(query_2(output_table_name))
     output_df.createOrReplaceTempView(output_table_name)
     return output_df
