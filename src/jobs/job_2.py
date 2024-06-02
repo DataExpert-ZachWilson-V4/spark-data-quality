@@ -55,6 +55,7 @@ def main():
     Main executable function to trigger the upsert job using a Spark session.
     This function setups the Spark session, calls the job function, and handles the output.
     """
+
     output_table_name: str = "actors"  # Designate the target table name
     spark_session: SparkSession = (
         SparkSession.builder
