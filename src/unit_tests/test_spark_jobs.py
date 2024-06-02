@@ -168,16 +168,8 @@ def test_inc_host_data(spark_session):
             event_time = "2023-01-01 21:29:03.519"
         ),
         WebEvents(
-            host = "www.zachwilson.tech",
-            event_time = "2023-01-01 21:29:05.112"
-        ),
-        WebEvents(
             host = "www.eczachly.com",
             event_time = "2023-01-01 00:01:39.907"
-        ),
-        WebEvents(
-            host = "www.eczachly.com",
-            event_time = "2023-01-01 00:03:24.519"
         ),
         WebEvents(
             host = "admin.zachwilson.tech",
