@@ -40,3 +40,53 @@ def test_job1(spark):
     out_df = spark.createDataFrame(expected_output)
     
     assert_df_equality(in_df, out_df, ignore_nullable=True)
+
+def test_job2(spark):
+    input_data = [
+        job2_in(
+            game_id=123,
+            team_id=123,
+            team_abbreviation="abc",
+            team_city="mil",
+            player_id=123,
+            player_name="abc asd",
+            nickname="abc", 
+            start_position=0, 
+            comment="abc", 
+            min=0,
+            fgm=0,
+            fga=0, 
+            fg_pct=0,
+            fg3m=0,
+            fg3a=0,
+            fg3_pct=0.2,
+            ftm=0, 
+            fta=0, 
+            ft_pct=0,
+            oreb=0, 
+            dreb=0,
+            reb=0,
+            ast=0,
+            stl=0,
+            blk=0,
+            to=0, 
+            pf=0, 
+            pts=0, 
+            plus_minus=0
+            )
+    ]
+
+    input_dataframe = spark.createDataFrame(input_data)
+    in_df = job_2(spark, input_dataframe)
+
+    expected_output = [
+        job2_out(
+            game_id=123,
+            team_id=123,
+            player_id=123,
+            row_count=1
+        )
+    ]
+    out_df = spark.createDataFrame(expected_output)
+    
+    assert_df_equality(in_df, out_df, ignore_nullable=True)
