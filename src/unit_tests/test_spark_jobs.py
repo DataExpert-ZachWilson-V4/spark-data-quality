@@ -20,16 +20,52 @@ def test_job1(spark):
         job1_input(
           actor="Famous Actor", 
           actor_id="nm9999999", 
+          films=[["Phobias","tt8129682",289,3.7],["SampleMovie","tt8123921",1764,4.7]],
+          quality_class="bad",
+          is_active=True, 
+          current_year=2021),
+    ]
+
+    input_dataframe = spark.createDataFrame(input_data)
+    actual_df = job1(spark, input_dataframe)
+    expected_output = [
+        job1_output(
+            actor_id="nm9999999",
+            actor="Famous Actor",
+            quality_class="bad",
+            is_active=True,
+            start_date=2018,
+            end_date=2021,
+            current_year=2021
+            }
+        )
+    ]
+    expected_df = spark.createDataFrame(expected_output)
+    assert_df_equality(actual_df, expected_df, ignore_nullable=True)
+
+
+def test_job2(spark):
+    input_data = [
+        job2_input(
+          actor="Famous Actor", 
+          actor_id="nm9999999", 
           films=[["Phobias","tt8129682",289,3.7]],
           quality_class="bad",
           is_active=True, 
           current_year=2018),
+        job1_input(
+          actor="Famous Actor", 
+          actor_id="nm9999999", 
+          films=[["Phobias","tt8129682",289,3.7],["SampleMovie","tt8123921",1764,4.7]],
+          quality_class="bad",
+          is_active=True, 
+          current_year=2021),
     ]
 
     input_dataframe = spark.createDataFrame(input_data)
-    actual_df = do_team_vertex_transformation(spark, input_dataframe)
+    actual_df = job2(spark, input_dataframe)
     expected_output = [
-        job1_output(
+        job2_output(
             actor_id="nm9999999",
             actor="Famous Actor",
             quality_class="bad",
