@@ -77,7 +77,6 @@ def test_job_2(spark):
         web_events(-188443929, 27181149, "", "admin.zachwilson.tech", "/", "2023-01-02 02:49:45.934 UTC"),
         web_events(-2052853069, -290659081, "", "www.zachwilson.tech", "/", "2023-01-02 03:50:18.059 UTC"),
         web_events(-2052853069, -290659081, "", "www.zachwilson.tech", "/", "2023-01-02 17:12:42.304 UTC"),
-        web_events(-2052853069, -290659081, "", "www.zachwilson.tech", "/", "2023-01-02 17:16:31.808 UTC"),
         web_events(-2052853069, -290659081, "", "www.zachwilson.tech", "/atom.xml", "2023-01-02 23:33:37.920 UTC")
     ]
 

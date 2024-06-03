@@ -13,7 +13,7 @@ def query_1(output_table_name: str) -> str:
         FROM
         {output_table_name}
         WHERE
-        current_year = 2008 -- CHANGE THIS VALUE
+        current_year = 2008
     ),
     current_film AS (
         SELECT
@@ -25,7 +25,7 @@ def query_1(output_table_name: str) -> str:
         FROM
         bootcamp.actor_films
         WHERE
-        YEAR = 2009 -- CHANGE THIS VALUE
+        YEAR = 2009
         GROUP BY actor,actor_id, year
     )
 
