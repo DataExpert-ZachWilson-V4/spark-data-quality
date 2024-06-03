@@ -29,7 +29,7 @@ def query_1(output_table_name: str, current_year: int) -> str:
                 actor_id IS NOT NULL AS is_active,
                 year AS current_year
             FROM
-                bootcamp.actor_films
+                actor_films
             WHERE
                 year = {current_year + 1}
             GROUP BY 
@@ -68,7 +68,7 @@ def job_1(spark_session: SparkSession, output_table_name: str, current_year: int
 
 def main():
     output_table_name: str = "actors"
-    current_year = 1913
+    current_year = 2010
     spark_session: SparkSession = (
         SparkSession.builder.master("local").appName("job_1").getOrCreate()
     )

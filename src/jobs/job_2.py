@@ -20,9 +20,9 @@ def query_2(output_table_name: str) -> str:
                 -- Generating an array here so we don't repeat the code in the final SELECT statement
                 ARRAY_AGG(DISTINCT CAST(DATE_TRUNC('day', event_time) AS DATE)) as event_date_array
             FROM
-                bootcamp.devices d
+                devices d
                 -- Left join to get all devices & browser types
-                LEFT JOIN bootcamp.web_events w
+                LEFT JOIN web_events w
             ON 
                 (d.device_id = w.device_id)
             WHERE
