@@ -181,13 +181,13 @@ def test_job2(spark):
         devices_cumulated(
             1272828233,
             "Chrome",
-            [date(2023, 1, 1)],
+            [date(2022, 12, 31)],
             date(2023, 1, 1),
         ),
         devices_cumulated(
             348646037,
             "Googlebot",
-            [date(2022, 12, 31)],
+            [date(2023, 1, 1)],
             date(2023, 1, 1),
         ),
     ]
@@ -199,14 +199,14 @@ def test_job2(spark):
         devices_cumulated(
             1272828233,
             "Chrome",
-            [date(2023, 1, 1), date(2023, 1, 2)],
-            date(2023, 1, 2),
+            [date(2022, 12, 31), date(2023, 1, 1)],
+            date(2023, 1, 1),
         ),
         devices_cumulated(
             348646037,
             "Googlebot",
-            [date(2022, 12, 31), date(2023, 1, 2)],
-            date(2023, 1, 2),
+            [date(2023, 1, 1)],
+            date(2023, 1, 1),
         ),
     ]
     expected_df = spark.createDataFrame(expected_output)
