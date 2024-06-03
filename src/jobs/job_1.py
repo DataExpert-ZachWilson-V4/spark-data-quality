@@ -5,7 +5,7 @@ from pyspark.sql.dataframe import DataFrame
 def query_1(output_table_name: str) -> str:
     query = f"""
    INSERT INTO
-actors_history_scd  --incremental load of scd table from actors table
+deeptianievarghese22866.actors_history_scd  --incremental load of scd table from actors table
 WITH
   last_year_scd AS (   --read scd table for previous years
     SELECT
@@ -125,7 +125,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_1(output_table_name))
 
 def main():
-    output_table_name: str = "actors_history_scd"
+    output_table_name: str = "deeptianievarghese22866.actors_history_scd"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
