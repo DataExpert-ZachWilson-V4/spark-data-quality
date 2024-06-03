@@ -132,11 +132,12 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         if 'maximum context length' in str(e):
-            logger.error(f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}")
+            error_message = f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}"
         else:
-            logger.error(f"The following error occurred while requesting a response from ChatGPT: {str(e)}")
+            error_message = f"The following error occurred while requesting a response from ChatGPT: {str(e)}"
+        logger.error(error_message)
         sys.exit(1)
-        return False, ''
+        return False, error_message
 
 def post_github_comment(git_token, repo, pr_number, comment):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
