@@ -1,93 +1,34 @@
 from chispa.dataframe_comparer import assert_df_equality
-from jobs.job_2 import job_2
+from ..jobs.job_2 import job_2
 from collections import namedtuple
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    IntegerType,
-    LongType,
-    DoubleType,
-    ArrayType,
-    BooleanType,
+from datetime import date
+
+UserDevicesCumulated = namedtuple(
+    "UserDevicesCumulated",
+    "user_id browser_type dates_active date"
 )
-Actor = namedtuple(
-    "Actor", "actor actor_id average_rating quality_class is_active current_year"
+
+UserBinaryActivity = namedtuple(
+    "UserBinaryActivity",
+    "user_id browser_type history_int history_in_binary",
 )
-ActorSCD = namedtuple(
-    "ActorSCD",
-    "actor actor_id is_active average_rating quality_class start_date, end_date, current_year",
-)
-input_actors_data = [
-    Actor(
-        actor="Clancy Brown",
-        actor_id="nm0000317",
-        average_rating=5.60,
-        quality_class="bad",
-        is_active=True,
-        current_year=2012,
-    ),  
-    Actor(
-        actor="Kevin Bacon",
-        actor_id="nm0000102",
-        average_rating=6.3,
-        quality_class="average",
-        is_active=True,
-        current_year=2012,
+
+input_data = [
+    UserDevicesCumulated(
+        user_id=1, browser_type="Chrome", dates_active=[date(2023,1,2)],date= date(2023,1,4)
     ),
 ]
-expected_actorscd_output = [
-    ActorSCD(
-        actor="Clancy Brown",
-        actor_id="nm0000317",
-        is_active=True,
-        average_rating=5.60,
-        quality_class="bad",
-        start_date=2012,
-        end_date=2012,
-        current_year=2012,
-    ),
-      ActorSCD(
-        actor="Kevin Bacon",
-        actor_id="nm0000102",
-        is_active=True,
-        average_rating=6.3,
-        quality_class="average",
-        start_date=2012,
-        end_date=2012,
-        current_year=2012,
-    ),
-]
-actors_schema = StructType(
-    [
-        StructField("actor", StringType(), True),
-        StructField("actor_id", StringType(), True),
-        StructField("average_rating", DoubleType(), False),
-        StructField("quality_class", StringType(), False),
-        StructField("is_active", BooleanType(), True),
-        StructField("current_year", IntegerType(), False),
+
+
+def test_job_2(spark_session):
+    fake_input_data = spark_session.createDataFrame(input_data)
+    actual_output_data = job_2(spark_session, fake_input_data)
+    expected_output_data = [
+        UserBinaryActivity(
+            user_id=1, browser_type="Chrome", history_int=536870912, history_in_binary="100000000000000000000000000000"
+        ),
     ]
-)
-actorscd_schema = StructType(
-    [
-        StructField("actor", StringType(), True),
-        StructField("actor_id", StringType(), True),
-        StructField("is_active", BooleanType(), True),
-        StructField("average_rating", DoubleType(), False),
-        StructField("quality_class", StringType(), False),
-        StructField("start_date", IntegerType(), True),
-        StructField("end_date", IntegerType(), True),
-        StructField("current_year", IntegerType(), False),
-    ]
-)
-def test_spark_queries_1(spark_session):
-    input_actors_dataframe = spark_session.createDataFrame(
-        input_actors_data, actors_schema
+    expected_output_data_df = spark_session.createDataFrame(expected_output_data)
+    assert_df_equality(
+        actual_output_data, expected_output_data_df, ignore_nullable=True
     )
-    input_actors_dataframe.orderBy("actor")
-    actual_dataframe = job_2(spark_session, input_actors_dataframe)
-
-    expected_df = spark_session.createDataFrame(expected_actorscd_output, actorscd_schema)
-
-    expected_df.orderBy("actor")
-    assert_df_equality(actual_dataframe, expected_df, ignore_nullable=True)
