@@ -135,7 +135,7 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
             error_message = f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}"
         else:
             error_message = f"The following error occurred while requesting a response from ChatGPT: {str(e)}"
-        logger.error(error_message)
+        print(error_message)
         sys.exit(1)
         return False, error_message
 
