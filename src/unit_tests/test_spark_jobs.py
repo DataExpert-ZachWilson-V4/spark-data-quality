@@ -1,22 +1,75 @@
+"""
+This module contains unit tests for Spark jobs using PyTest. It includes the following functionalities:
+1. Fixture for creating a Spark session.
+2. Utility functions for date conversion, row conversion, and JSON data loading.
+3. Test cases for Spark jobs 'job_1' and 'job_2'.
+
+The tests are designed to validate the correctness of the Spark jobs by comparing the actual output DataFrames with expected results.
+"""
+import os
 import pytest
-from pyspark.sql import SparkSession, DataFrame
-from typing import List, Dict
 from datetime import datetime
+from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, IntegerType, FloatType
+from typing import Any, Dict, List
 from src.jobs.job_1 import job_1
+from src.jobs.job_2 import job_2
+
+
 @pytest.fixture(scope="session")
 def spark_session():
+    """
+    Fixture for creating a Spark session with local master and app name 'pytest'.
+
+    Returns:
+        SparkSession: Spark session object.
+    """
     return SparkSession.builder \
         .master("local") \
         .appName("pytest") \
         .getOrCreate()
 
+
 def to_dt(date_str: str, is_date: bool = False) -> datetime:
-    if is_date:
-        return datetime.strptime(date_str, "%Y-%m-%d").date()
-    else:
-        return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    """
+    Converts a date string to a datetime or date object.
+
+    Args:
+        date_str (str): Date string to convert.
+        is_date (bool): Flag to determine if the output should be a date object.
+
+    Returns:
+        datetime: Converted datetime or date object.
+
+    Raises:
+        ValueError: If the date_str is not in the expected format.
+    """
+    try:
+        if is_date:
+            return datetime.strptime(date_str, "%Y-%m-%d").date()
+        else:
+            return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError as e:
+        raise ValueError(f"Incorrect date format: {date_str}. Expected format: '%Y-%m-%d' or '%Y-%m-%d %H:%M:%S'.") from e
+
+
+def convert_row_to_tuple(row: Any) -> tuple:
+    # Convert nested lists to tuples to make them hashable
+    row_dict = row.asDict()
+    row_dict['films'] = tuple(tuple(film) for film in row_dict['films'])
+    return tuple(row_dict.values())
+
 
 def test_job_1(spark_session) -> None:
+    """
+    Unit test for job_1 function. Creates mock web events data, runs the job, and validates the output.
+
+    Args:
+        spark_session (SparkSession): Spark session fixture.
+
+    Raises:
+        AssertionError: If the actual output does not match the expected output.
+    """
     web_events = [
         {"user_id": 1919317753, "device_id": 532630305, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:38"},
         {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:39"},
@@ -48,6 +101,74 @@ def test_job_1(spark_session) -> None:
     expected_user_devices_df: DataFrame = spark_session.createDataFrame(user_devices, schema)
     expected_user_devices_df.createOrReplaceTempView("sample_user_devices")
 
-    actual_user_devices_df = job_1(spark_session, "sample_web_events", "sample_devices", "sample_user_devices", '2023-01-14')
+    actual_user_devices_df = job_1(
+        spark_session,
+        "sample_web_events",
+        "sample_devices",
+        "sample_user_devices",
+        '2023-01-14'
+    )
 
     assert actual_user_devices_df.collect() == expected_user_devices_df.collect()
+
+
+def test_job_2(spark_session: SparkSession) -> None:
+    """
+    Unit test for job_2 function. Creates mock actor films data, runs the job, and validates the output.
+
+    Args:
+        spark_session (SparkSession): Spark session fixture.
+
+    Raises:
+        AssertionError: If the actual output does not match the expected output.
+    """
+
+    actor_films = [
+        {"actor": "Milton Berle", "actor_id": "nm0000926", "film": "Little Lord Fauntleroy", "year": 1921, "votes": 283, "rating": 6.7, "film_id": "tt0012397"},
+        {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "A Sailor-Made Man", "year": 1921, "votes": 972, "rating": 6.9, "film_id": "tt0012642"},
+        {"actor": "Marion Davies", "actor_id": "nm0203836", "film": "Enchantment", "year": 1921, "votes": 275, "rating": 6.4, "film_id": "tt0012136"},
+        {"actor": "Marion Davies", "actor_id": "nm0203836", "film": "Buried Treasure", "year": 1921, "votes": 168, "rating": 6.4, "film_id": "tt0012016"},
+        {"actor": "Lillian Gish", "actor_id": "nm0001273", "film": "Orphans of the Storm", "year": 1921, "votes": 4797, "rating": 7.3, "film_id": "tt0012532"},
+        {"actor": "Gloria Swanson", "actor_id": "nm0841797", "film": "The Affairs of Anatol", "year": 1921, "votes": 1215, "rating": 6.6, "film_id": "tt0011909"},
+        {"actor": "Charles Chaplin", "actor_id": "nm0000122", "film": "The Kid", "year": 1921, "votes": 115152, "rating": 8.3, "film_id": "tt0012349"},
+        {"actor": "Loretta Young", "actor_id": "nm0949835", "film": "The Sheik", "year": 1921, "votes": 3127, "rating": 6.4, "film_id": "tt0012675"}
+    ]
+    actors_history = [
+        {"actor_id": "nm0000926", "actor": "Milton Berle", "films": [["tt0012397", "Little Lord Fauntleroy", 1921, 283, 6.7]], "quality_class": "average", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0516001", "actor": "Harold Lloyd", "films": [["tt0012642", "A Sailor-Made Man", 1921, 972, 6.9]], "quality_class": "average", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0203836", "actor": "Marion Davies", "films": [["tt0012136", "Enchantment", 1921, 275, 6.4], ["tt0012016", "Buried Treasure", 1921, 168, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0001273", "actor": "Lillian Gish", "films": [["tt0012532", "Orphans of the Storm", 1921, 4797, 7.3]], "quality_class": "good", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0841797", "actor": "Gloria Swanson", "films": [["tt0011909", "The Affairs of Anatol", 1921, 1215, 6.6]], "quality_class": "average", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0000122", "actor": "Charles Chaplin", "films": [["tt0012349", "The Kid", 1921, 115152, 8.3]], "quality_class": "star", "is_active": True, "current_year": 1921},
+        {"actor_id": "nm0949835", "actor": "Loretta Young", "films": [["tt0012675", "The Sheik", 1921, 3127, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921}
+    ]
+
+    # Create DataFrame for actor films
+    actor_films_df = spark_session.createDataFrame(actor_films)
+    actor_films_df.createOrReplaceTempView("mock_actor_films")
+
+    # Define schema for expected actors history
+    schema = StructType([
+        StructField("actor_id", StringType(), True),
+        StructField("actor", StringType(), True),
+        StructField("films", ArrayType(ArrayType(StringType())), True),
+        StructField("quality_class", StringType(), True),
+        StructField("is_active", BooleanType(), True),
+        StructField("current_year", IntegerType(), True)
+    ])
+    expected_actors_history_df: DataFrame = spark_session.createDataFrame(actors_history, schema)
+
+    # Test the job_2 function with the inputs given
+    actual_actors_history_df = job_2(spark_session, "mock_actor_films")
+
+    # Convert DataFrames to sets of rows for comparison
+    expected_set = set([convert_row_to_tuple(row) for row in expected_actors_history_df.collect()])
+    actual_set = set([convert_row_to_tuple(row) for row in actual_actors_history_df.collect()])
+
+    assert expected_set == actual_set, \
+        f"Actor history mismatch. \nExpected: {expected_actors_history_df.collect()} \nActual: {actual_actors_history_df.collect()}"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
+
