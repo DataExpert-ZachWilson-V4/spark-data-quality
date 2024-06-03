@@ -5,14 +5,20 @@ from collections import namedtuple
 from datetime import date
 
 # Test 1 setup
-actor_films = namedtuple("ActorFilms", "actor, actor_id, film, year, votes, rating, film_id")
-actor = namedtuple("Actor", "actor, actor_id, films, quality_class, is_active, current_year")
+actor_films = namedtuple(
+    "ActorFilms", "actor, actor_id, film, year, votes, rating, film_id"
+)
+actor = namedtuple(
+    "Actor", "actor, actor_id, films, quality_class, is_active, current_year"
+)
 
 # Test 2 setup
-devices = namedtuple("Devices", "device_id, browser_type, dates_active, event_count")
-web_events = namedtuple("WebEvents", "user_id, device_id, referrer, host, url, event_time")
+devices = namedtuple("Devices", "device_id, browser_type, dates_active")
+web_events = namedtuple(
+    "WebEvents", "user_id, device_id, referrer, host, url, event_time"
+)
 devices_cumulated = namedtuple(
-    "DevicesCumulated", "user_id browser_type dates_active date"
+    "DevicesCumulated", "user_id, browser_type, dates_active, date"
 )
 
 
@@ -131,48 +137,59 @@ def test_job1(spark):
     # Assert
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
 
+
 def test_job2(spark):
 
     input_data_devices = [
-        devices(-1138341683, "Chrome", [date(2023, 1, 2)], 1),
-        devices(1967566123, "Safari", [date(2023, 1, 2)], 2),
-        devices(328474741, "Mobile Safari", [date(2022, 12, 31)], 3),
+        devices(-1894773659, "Chrome", [date(2022, 12, 31)]),
+        devices(1535782140, "Chrome", [date(2022, 12, 31)]),
+        devices(-2012543895, "Googlebot", [date(2023, 1, 1)]),
     ]
     fake_devices_df = spark.createDataFrame(input_data_devices)
     fake_devices_df.createOrReplaceTempView("devices")
 
     input_data_web_events = [
         web_events(
-            1967566579,
-            -1138341683,
-            "",
-            "www.eczachly.com",
-            "/",
-            "2023-01-02 21:57:37.422 UTC",
+            -1463276726,
+            1535782140,
+            "http://zachwilson.tech",
+            "www.zachwilson.tech",
+            "/wp/wp-login.php",
+            "2022-12-31 00:08:27.835 UTC",
         ),
         web_events(
-            1041379120,
-            1967566123,
+            1272828233,
+            -1894773659,
             None,
-            "www.eczachly.com",
-            "/lessons",
-            "2023-01-02 08:01:51.009 UTC",
+            "admin.zachwilson.tech",
+            "/robots.txt",
+            "2022-12-31 00:09:53.157 UTC",
         ),
         web_events(
-            -1041379335,
-            328474741,
-            "",
-            "admin.zachwilson.tech",
+            348646037,
+            -2012543895,
+            None,
+            "www.zachwilson.tech",
             "/",
-            "2022-12-31 08:01:51.009 UTC",
+            "2023-01-01 02:11:36.696 UTC",
         ),
     ]
     fake_web_events_df = spark.createDataFrame(input_data_web_events)
     fake_web_events_df.createOrReplaceTempView("web_events")
 
     input_data_devices_cumulated = [
-        devices_cumulated(1967566579, "Chrome", [date(2023, 1, 1)], date(2023, 1, 1)),
-        devices_cumulated(1041379120, None, [date(2023, 1, 1)], date(2023, 1, 1)),
+        devices_cumulated(
+            1272828233,
+            "Chrome",
+            [date(2023, 1, 1)],
+            date(2023, 1, 1),
+        ),
+        devices_cumulated(
+            348646037,
+            "Googlebot",
+            [date(2022, 12, 31)],
+            date(2023, 1, 1),
+        ),
     ]
     devices_cumulated_df = spark.createDataFrame(input_data_devices_cumulated)
     devices_cumulated_df.createOrReplaceTempView("devices_cumulated")
@@ -180,10 +197,16 @@ def test_job2(spark):
     # Expected output
     expected_output = [
         devices_cumulated(
-            1041379120, "Safari", [date(2023, 1, 2), date(2023, 1, 1)], date(2023, 1, 2)
+            1272828233,
+            "Chrome",
+            [date(2023, 1, 1), date(2023, 1, 2)],
+            date(2023, 1, 2),
         ),
         devices_cumulated(
-            1967566579, "Chrome", [date(2023, 1, 2), date(2023, 1, 1)], date(2023, 1, 2)
+            348646037,
+            "Googlebot",
+            [date(2022, 12, 31), date(2023, 1, 2)],
+            date(2023, 1, 2),
         ),
     ]
     expected_df = spark.createDataFrame(expected_output)
