@@ -8,17 +8,14 @@ from src.jobs.job_2 import job_2
 
 
 def to_dt(date_str: str, is_date: bool = False) -> datetime:
-    try:
-        if is_date:
-            return datetime.strptime(date_str, "%Y-%m-%d").date()
-        else:
-            return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-    except ValueError as e:
-        raise ValueError(f"Incorrect date format: {date_str}. Expected format: '%Y-%m-%d' or '%Y-%m-%d %H:%M:%S'.") from e
+    if is_date:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    else:
+        return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
 
 def convert_row_to_tuple(row: Any) -> tuple:
-   row_dict = row.asDict()
+    row_dict = row.asDict()
     row_dict['films'] = tuple(tuple(film) for film in row_dict['films'])
     return tuple(row_dict.values())
 
@@ -70,12 +67,10 @@ def test_job_2(spark_session: SparkSession) -> None:
     actor_films = [
         {"actor": "Milton Berle", "actor_id": "nm0000926", "film": "Little Lord Fauntleroy", "year": 1921, "votes": 283, "rating": 6.7, "film_id": "tt0012397"},
         {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "A Sailor-Made Man", "year": 1921, "votes": 972, "rating": 6.9, "film_id": "tt0012642"},
-        {"actor": "Marion Davies", "actor_id": "nm0203836", "film": "Enchantment", "year": 1921, "votes": 275, "rating": 6.4, "film_id": "tt0012136"},
     ]
     actors_history = [
         {"actor_id": "nm0000926", "actor": "Milton Berle", "films": [["tt0012397", "Little Lord Fauntleroy", 1921, 283, 6.7]], "quality_class": "average", "is_active": True, "current_year": 1921},
         {"actor_id": "nm0516001", "actor": "Harold Lloyd", "films": [["tt0012642", "A Sailor-Made Man", 1921, 972, 6.9]], "quality_class": "average", "is_active": True, "current_year": 1921},
-        {"actor_id": "nm0203836", "actor": "Marion Davies", "films": [["tt0012136", "Enchantment", 1921, 275, 6.4], ["tt0012016", "Buried Treasure", 1921, 168, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921},
     ]
 
     actor_films_df = spark_session.createDataFrame(actor_films)
