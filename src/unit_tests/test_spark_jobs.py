@@ -3,9 +3,6 @@ from collections import namedtuple
 
 from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
-import pytest
-from pyspark.sql import SparkSession
-from typing import Callable
 from pyspark.sql.types import (
     StructType,
     StructField,
