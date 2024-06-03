@@ -4,7 +4,6 @@ from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
 from collections import namedtuple
 
-# define named tuples
 Actors = namedtuple ("Actors", "actor actor_id films quality_class is_active current_year")
 Actors_Films = namedtuple("Actors_Films", "actor actor_id film year votes rating film_id")
 
@@ -16,7 +15,6 @@ def test_job_1(spark):
         Actors_Films("Kevin Bacon", "nm0000102", "My One and Only", 2009, 8538, 6.5, "tt1185431")
     ]
 
-    # expected output based on our input
     expected_output = [
         Actors(
             actor = 'Robert Downey Jr.', 
@@ -62,13 +60,11 @@ def test_job_1(spark):
     
     expected_df = spark.createDataFrame(expected_output)
     
-    # running the job
     actual_df = job_1(sparks, "Actors_Films")
     
-    # verifying that the dataframes are identical
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
 
-# define named tuples
+
 web_events = namedtuple("web_events", "user_id device_id referrer host url event_time")
 devices = namedtuple("devices", "device_id browser_type os_type device_type")
 devices_cumulated = namedtuple("devices_cumulated", "user_id browser_type dates_active date")
@@ -96,7 +92,6 @@ def test_job_2(spark):
         devices_cumulated(-2052853069, 'bingbot', [date(2023, 1, 1)], date(2023, 1, 1))
     ]
 
-    # expected output based on our input
     expected_output = [
         devices_cumulated(user_id = -2077270748, browser_type = 'Googlebot', dates_active = [date(2023, 1, 1), date(2023, 1, 2)], date = date(2023, 1, 2)),
         devices_cumulated(user_id = -188443929, browser_type = 'Chrome', dates_active = [date(2023, 1, 2)], date = date(2023, 1, 2)),
@@ -114,8 +109,6 @@ def test_job_2(spark):
 
     expected_df = spark.createDataFrame(expected_output)
 
-    # running the job
     actual_df = job_2(spark, "devices_cumulated")
 
-    # verifying that the dataframes are identical
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
