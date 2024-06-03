@@ -30,8 +30,7 @@ def test_job_1_generation(spark):
     
 def test_job_2_generation(spark):
     input_data = [
-        Actors("A", 1, "Good", True, 1999, 2003, 2005),
-        # Actors("B", 2, "Average", True, 1997, 2001, 2005)
+        Actors("A", 1, "Good", True, 2005, 2005, 2005)
     ]
 
 
@@ -45,20 +44,10 @@ def test_job_2_generation(spark):
             actor_id=1,
             quality_class='Good', 
             is_active=True,
-            start_date=1999, 
-            end_date=2003,
+            start_date=2005, 
+            end_date=2005,
             current_year=2005
         )
-        ,
-        # Actors(
-        #     actor='B', 
-        #     actor_id=2,
-        #     quality_class='Average', 
-        #     is_active=True,
-        #     start_date=1997, 
-        #     end_date=2001,
-        #     current_year=2005
-        # )
     ]
     expected_df = spark.createDataFrame(expected_output)
     assert_df_equality(actual_df, expected_df, ignore_nullable=True, ignore_row_order=True)

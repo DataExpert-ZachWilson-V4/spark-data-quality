@@ -20,7 +20,6 @@ def query_2(output_table_name: str) -> str:
             ) AS prev_is_active,
             current_year
         FROM {output_table_name}
-        WHERE current_year = 2003
     ),
     result AS ( -- CTE to track if anything changed between previous and current year
         SELECT
