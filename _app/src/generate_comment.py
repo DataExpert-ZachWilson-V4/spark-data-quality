@@ -70,6 +70,7 @@ def get_prompts(assignment: str) -> dict:
     prompts = [
         'example_solution.md',
         'system_prompt.md',
+        'user_prompt_feedback.md',
         'user_prompt_jobs.md',
         'user_prompt_tests.md',
         'week_1_queries.md',
@@ -147,14 +148,14 @@ def main():
     tests_comment = ''
     
     if jobs_submissions:
-        jobs_feedback_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'analyze')
+        jobs_feedback_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_feedback.md', 'analyze')
         feedback_comment = get_response(system_prompt, jobs_feedback_prompt)
         jobs_grading_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'grade')
         grading_comment = get_response(system_prompt, jobs_grading_prompt)
         jobs_comment += f"## Feedback:\n{feedback_comment}\n\n## Grading Rubric Evaluation:\n{grading_comment}"
 
     if tests_submissions:
-        tests_feedback_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'analyze')
+        tests_feedback_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_feedback.md', 'analyze')
         feedback_comment = get_response(system_prompt, tests_feedback_prompt)
         tests_grading_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'grade')
         grading_comment = get_response(system_prompt, tests_grading_prompt)
