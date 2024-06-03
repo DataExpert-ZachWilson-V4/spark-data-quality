@@ -1,9 +1,12 @@
+from datetime import date, datetime
+
 import pytest
 from pyspark.sql import SparkSession
 from chispa.dataframe_comparer import *
-from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, DoubleType, LongType
+from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, DoubleType, LongType, DateType, TimestampType
 from collections import namedtuple
 from src.jobs.job_1 import job_1
+from src.jobs.job_2 import job_2
 
 
 @pytest.fixture(scope="session")
@@ -89,3 +92,54 @@ def test_job1(spark_session):
 
     # Step 7: Asserting dataframes equality
     assert_df_equality(actual_output_df, expected_output_df, ignore_row_order=True)
+
+
+def test_job2(spark_session):
+    # Prepare old output data
+    output_schema = StructType(
+        [
+            StructField("host", StringType(), True),
+            StructField("host_activity_datelist", ArrayType(DateType()), True),
+            StructField("date", DateType(), True),
+        ]
+    )
+    initial_data = [
+        {"host": "www.eczachly.com", "host_activity_datelist": [date(2023, 1, 1)], "date": date(2023, 1, 1)},
+        {"host": "www.zachwilson.tech", "host_activity_datelist": [date(2023, 1, 1)], "date": date(2023, 1, 1)},
+        {"host": "admin.zachwilson.tech", "host_activity_datelist": [date(2023, 1, 1)], "date": date(2023, 1, 1)},
+    ]
+    output_dataframe = spark_session.createDataFrame(data=initial_data, schema=output_schema)
+    output_dataframe.createOrReplaceTempView("hosts_cumulated")
+
+    # Prepare new input data (Today's data)
+    input_schema = StructType(
+        [
+            StructField("host", StringType(), True),
+            StructField("event_time", TimestampType(), True),
+        ]
+    )
+    input_data = [
+        {"host": "www.eczachly.com", "event_time": datetime(2023, 1, 2)},
+        {"host": "www.zachwilson.tech", "event_time": datetime(2023, 1, 2)},
+        {"host": "admin.zachwilson.tech", "event_time": datetime(2023, 1, 2)},
+    ]
+    input_dataframe = spark_session.createDataFrame(data=input_data, schema=input_schema)
+    input_dataframe.createOrReplaceTempView("web_events")
+
+    # Execute the job being tested
+    actual_df = job_2(spark_session, "web_events", "hosts_cumulated", "2023-01-02")
+
+    # Define expected output for job_2
+    expected_output = [
+        {"host": "www.eczachly.com", "host_activity_datelist": [date(2023, 1, 2), date(2023, 1, 1)],
+         "date": date(2023, 1, 2)},
+        {"host": "www.zachwilson.tech", "host_activity_datelist": [date(2023, 1, 2), date(2023, 1, 1)],
+         "date": date(2023, 1, 2)},
+        {"host": "admin.zachwilson.tech", "host_activity_datelist": [date(2023, 1, 2), date(2023, 1, 1)],
+         "date": date(2023, 1, 2)},
+    ]
+
+    expected_df = spark_session.createDataFrame(expected_output, schema=output_schema)
+
+    # Assert that the actual DataFrame matches the expected DataFrame
+    assert_df_equality(actual_df, expected_df, ignore_nullable=True, ignore_row_order=True)
