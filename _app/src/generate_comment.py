@@ -3,6 +3,7 @@ import re
 import logging
 import requests
 import boto3
+import sys
 from util import get_logger, get_api_key, check_aws_creds, get_git_creds, get_assignment, get_submission_dir  #, get_changed_files
 from openai import OpenAI
 
@@ -131,23 +132,11 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         if 'maximum context length' in str(e):
-            return False, f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}"
+            logger.error(f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}")
         else:
-            return False, f"The following error occurred while requesting a response from ChatGPT: {str(e)}"
-
-    
-# def get_response(system_prompt: str, user_prompt: str) -> str:
-#     response = client.chat.completions.create(
-#         model="gpt-4",
-#         messages=[
-#             {"role": "system", "content": system_prompt},
-#             {"role": "user", "content": user_prompt},
-#         ],
-#         temperature=0,
-#     )
-#     comment = response.choices[0].message.content
-#     # text = f"This is a LLM-generated comment: \n{comment if comment else 'No feedback generated.'}"
-#     return comment
+            logger.error(f"The following error occurred while requesting a response from ChatGPT: {str(e)}")
+        sys.exit(1)
+        return False, ''
 
 def post_github_comment(git_token, repo, pr_number, comment):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
@@ -184,14 +173,14 @@ def main():
     if feedback_passed:
         final_comment += f"# ChatGPT Generated Feedback:\n{feedback_comment}\n"
     else:
-        final_comment += f"**Error**:\n{feedback_comment}\n"
+        return f"**Error generating feedback**:\n{feedback_comment}\n\n"
     
     grading_prompt = generate_grading_prompt(prompts, submissions)
     grading_passed, grading_comment = get_response(system_prompt, grading_prompt)
     if grading_passed:
         final_comment += f"# ChatGPT Grading Rubric Evaluation:\n{grading_comment}\n"
     else:
-        final_comment += f"**Error:**\n{grading_comment}\n"
+        return f"**Error generating grading rubric:**\n{grading_comment}\n\n"
     
     if git_token and repo and pr_number:
         post_github_comment(git_token, repo, pr_number, final_comment)
