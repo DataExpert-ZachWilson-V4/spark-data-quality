@@ -44,7 +44,7 @@ def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_2(output_table_name))
 
 def main():
-    output_table_name: str = "user_devices_cumulated"
+    output_table_name: str = "deeptianievarghese22866.user_devices_cumulated"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
