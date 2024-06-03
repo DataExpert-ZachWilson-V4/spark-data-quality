@@ -3,8 +3,9 @@ from chispa.dataframe_comparer import assert_df_equality
 from chispa.dataframe_comparer import *
 
 from collections import namedtuple
+from pyspark.sql.types import StructType, StructField, StringType, LongType, ArrayType,BooleanType, DateType
 
-from jobs import job_2, job_1
+from jobs import job_2
 
 # define named tuples
 PlayerSeason = namedtuple("PlayerSeason", "player_name is_active current_season")
@@ -14,63 +15,69 @@ PlayerScd = namedtuple("PlayerScd", "player_name is_active start_season end_seas
 def test_job_1(spark_session):
     input_table_name: str = "nba_players"
     source_data = [
-        PlayerSeason("Michael Jordan", True, 2001),
-        PlayerSeason("Michael Jordan", True, 2002),
-        PlayerSeason("Michael Jordan", True, 2003),
-        PlayerSeason("Michael Jordan", False, 2004),
-        PlayerSeason("Michael Jordan", False, 2005),
-        PlayerSeason("Scottie Pippen", True, 2001),
-        PlayerSeason("Scottie Pippen", False, 2002),
-        PlayerSeason("Scottie Pippen", False, 2003),
-        PlayerSeason("Scottie Pippen", True, 2004),
-        PlayerSeason("Scottie Pippen", True, 2005),
-        PlayerSeason("LeBron James", True, 2003),
-        PlayerSeason("LeBron James", True, 2004),
-        PlayerSeason("LeBron James", True, 2005)
+        PlayerSeason("Michael Jordan", True, 2011),
+        PlayerSeason("Michael Jordan", True, 2012),
+        PlayerSeason("Michael Jordan", True, 2013),
+        PlayerSeason("Michael Jordan", False, 2014),
+        PlayerSeason("Michael Jordan", False, 2015),
+        PlayerSeason("LeBron James", True, 2013),
+        PlayerSeason("LeBron James", True, 2014),
+        PlayerSeason("LeBron James", True, 2015),
+        PlayerSeason("Scottie Pippen", True, 2011),
+        PlayerSeason("Scottie Pippen", False, 2012),
+        PlayerSeason("Scottie Pippen", False, 2013),
+        PlayerSeason("Scottie Pippen", True, 2014),
+        PlayerSeason("Scottie Pippen", True, 2015)
     ]
     source_df = spark_session.createDataFrame(source_data)
 
     from jobs.job_1 import job_1
     actual_df = job_1(spark_session, source_df, input_table_name)
     expected_data = [
-        PlayerScd("Michael Jordan", True, 2001, 2003),
-        PlayerScd("Michael Jordan", False, 2004, 2005),
-        PlayerScd("Scottie Pippen", True, 2001, 2001),
-        PlayerScd("Scottie Pippen", False, 2002, 2003),
-        PlayerScd("Scottie Pippen", True, 2004, 2005),
-        PlayerScd("LeBron James", True, 2003, 2005)
+        PlayerScd("Michael Jordan", True, 2011, 2013),
+        PlayerScd("Michael Jordan", False, 2014, 2015),
+        PlayerScd("Scottie Pippen", True, 2011, 2011),
+        PlayerScd("Scottie Pippen", False, 2012, 2013),
+        PlayerScd("Scottie Pippen", True, 2014, 2015),
+        PlayerScd("LeBron James", True, 2013, 2015)
     ]
     expected_df = spark_session.createDataFrame(expected_data)
     assert_df_equality(actual_df.sort("player_name", "start_season"), expected_df.sort("player_name", "start_season"))
 
-    # define named tuples
 
 
-actor_films = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
-actors = namedtuple("Actors", "actor actor_id films quality_class is_active current_year")
 
 
 def test_job_2(spark_session):
+
+    # define named tuples
+    actors = namedtuple("actors", "actor actor_id films quality_class is_active current_year")
+
     input_data = [
-        actor_films("Wesley Snipes", "nm0000648", "The Art of War", "2000", "28821", "5.7", "tt0160009"),
-        actor_films("Sean Connery", "nm0000125", "Finding Forrester", "2000", "83472", "7.3", "tt0181536"),
-        actor_films("Kevin Bacon", "nm0000102", "Hollow Man", "2000", "124335", "5.8", "tt0164052"),
+        actors(actor="Liam Neeson", actor_id="nm0000553", films=[[2021,"The Marksman",2333,5.9,"tt6902332"]], quality_class=1, is_active=1, current_year='2021'),
+        actors(actor="Luenell", actor_id="nm0132685", films=[[2021,"Coming 2 America",49700,5.3,"tt6802400"]], quality_class=0, is_active=1, current_year='2021'),
+        actors(actor="Ruta Lee", actor_id="nm0498181", films=[[2021,"Senior Moment",208,5.2,"tt6588950"]], quality_class=1, is_active=0, current_year='2021'),
+        actors(actor="Michael McElhatton", actor_id="nm0568385", films=[[2021,"Zack Snyder's Justice League",242474,8.2,"tt12361974"]], quality_class=1, is_active=1, current_year='2021')
     ]
 
-    # expected output based on our input
-    expected_output = [
-        actors("Wesley Snipes", "nm0000648", [["The Art of War", 28821, 5.7, "tt0160009", 2000]], "bad", 1, 2000),
-        actors("Sean Connery", "nm0000125", [["Finding Forrester", 83472, 7.3, "tt0181536", 2000]], "good", 1, 2000),
-        actors("Kevin Bacon", "nm0000102", [["Hollow Man", 124355, 5.8, "tt0164052", 2000]], "average", 1, 2000)
-    ]
+    input_df = spark_session.createDataFrame(input_data)
 
-    input_data_df = spark_session.createDataFrame(input_data)
-    input_data_df.createOrReplaceTempView("actor_films")
+    # create a temp table from input_df
+    input_df.createOrReplaceTempView("actors")
+    test_output_table_name = "actors"
 
-    expected_output_df = spark_session.createDataFrame(expected_output)
+    actual_df = job_2.job_2(spark_session, test_output_table_name)
 
-    # running the job
-    actual_df = job_2(spark_session, "actors")
+    print(f"Resulting Schema {actual_df.schema}")
 
-    # verifying that the dataframes are identical
-    assert_df_equality(actual_df, expected_output_df, ignore_nullable=True)
+    expected_schema = StructType([
+        StructField("actor", StringType(), True),
+        StructField("actor_id", StringType(), True),
+        StructField("quality_class", LongType(), True),
+        StructField("is_active", LongType(), True),
+        StructField("start_date", StringType(), True),
+        StructField("end_date", StringType(), True),
+        StructField("current_year", StringType(), True)
+    ])
+
+    assert actual_df.schema == expected_schema

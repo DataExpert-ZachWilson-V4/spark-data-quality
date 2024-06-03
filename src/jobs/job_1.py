@@ -11,7 +11,7 @@ def query_1(input_table_name: str) -> str:
           current_season,
           CASE WHEN LAG(is_active,1) OVER (PARTITION BY player_name ORDER BY current_season) THEN 1 ELSE 0 END AS is_active_last_season
         FROM {input_table_name}
-        WHERE current_season <= 2005
+        WHERE current_season <= 2015
         ), streaked AS (
           SELECT *,
             SUM(CASE WHEN is_active <> is_active_last_season THEN 1 ELSE 0 END) OVER (PARTITION BY player_name ORDER BY current_season) AS streak_identifier

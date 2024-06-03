@@ -5,42 +5,40 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_2(output_table_name: str) -> str:
     query = f"""
-    WITH last_year AS (
-    SELECT 
-        * 
-    FROM {output_table_name}
-    WHERE current_year = 1999
-    ), 
-    this_year AS (
-    SELECT
-        actor,
-        actor_id,
-        ARRAY_AGG(ROW(film, votes, rating, film_id, year)) AS films,
-        AVG(rating) AS avg_rating,
-        MAX(year) AS year
-    FROM actor_films
-    WHERE year = 2000
-    GROUP BY actor, actor_id
-    )
-    SELECT 
-        COALESCE(ly.actor, ty.actor) as actor,
-        COALESCE(ly.actor_id, ty.actor_id) as actor_id,
-        CASE
-            WHEN ty.films IS NULL THEN ly.films
-            WHEN ty.films IS NOT NULL and ly.films IS NULL THEN ty.films
-            WHEN ty.films IS NOT NULL and ly.films IS NOT NULL THEN ty.films || ly.films 
-        END as films,
-        CASE
-            WHEN ty.avg_rating > 8 THEN 'star'
-            WHEN ty.avg_rating > 7 and ty.avg_rating <= 8 THEN 'good'
-            WHEN ty.avg_rating > 6 and ty.avg_rating <= 7 THEN 'average'
-            ELSE 'bad'
-        END as quality_class,
-        ty.year IS NOT NULL as is_active,
-        COALESCE(ty.year, ly.current_year + 1) as current_year
-    FROM last_year ly
-    FULL OUTER JOIN this_year ty
-    on ly.actor_id = ty.actor_id
+            WITH lagged AS (
+                SELECT 
+                    actor,
+                    actor_id,
+                    quality_class,
+                    is_active,
+                    LAG(is_active, 1) OVER (partition by actor, actor_id ORDER BY current_year) AS is_active_last_year,
+                    current_year
+                from 
+                    {output_table_name}
+                ),
+                streaked AS (
+                SELECT 
+                    * ,
+                    SUM(CASE WHEN is_active <> is_active_last_year THEN 1 ELSE 0 END) OVER (partition by actor, actor_id ORDER BY current_year) AS streak_identifier
+                FROM 
+                    lagged
+                )
+                SELECT 
+                    actor, 
+                    actor_id, 
+                    quality_class, 
+                    MAX(is_active) AS is_active,
+                    MIN(current_year) AS start_date,
+                    MAX(current_year) AS end_date,
+                    current_year
+                FROM 
+                    streaked
+                GROUP BY 
+                    actor, 
+                    actor_id, 
+                    quality_class, 
+                    streak_identifier, 
+                    current_year
     """
     return query
 
