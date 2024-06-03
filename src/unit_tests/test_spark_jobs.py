@@ -6,6 +6,7 @@ from collections import namedtuple
 
 Actors = namedtuple ("Actors", "actor actor_id films quality_class is_active current_year")
 Actors_Films = namedtuple("Actors_Films", "actor actor_id film year votes rating film_id")
+film = namedtuple("Films", "year film votes rating film_id")
 
 def test_job_1(spark):
     input_data = [
@@ -16,42 +17,36 @@ def test_job_1(spark):
     ]
 
     expected_output = [
-        Actors(
-            actor = 'Robert Downey Jr.', 
-            actor_id = 'nm0000375', 
-            films = [
-                {'year': 2009, 'film': "Sherlock Holmes", 'votes': 587083, 'rating': 7.6, 'film_id':"tt0988045"},
-                {'year': 2009, 'film': "The Soloist", 'votes': 51753, 'rating': 6.7, 'film_id': "tt0821642"},
-                {'year': 2008, 'film': "Iron Man", 'votes': 951095, 'rating': 7.9, 'film_id': "tt0371746"},
-                {'year': 2008, 'film': "The Incredible Hulk", 'votes': 439469, 'rating': 6.7, 'film_id': "tt0800080"},
-                {'year': 2008, 'film': "Tropic Thunder", 'votes': 381427, 'rating': 7, 'film_id': "tt0942385"}
-            ],
-            quality_class = 'good',
-            is_active = 'true',
-            current_year = 2009
+        Actors('Robert Downey Jr.', 
+                'nm0000375', 
+                [Films(2009, "Sherlock Holmes", 587083, 7.6, "tt0988045"),
+                 Films(2009, "The Soloist", 51753, 6.7, "tt0821642"),
+                 Films(2008, "Iron Man", 951095, 7.9, "tt0371746"),
+                 Films(2008, "The Incredible Hulk", 439469, 6.7, "tt0800080"),
+                 Films(2008, "Tropic Thunder", 381427, 7, "tt0942385")
+                 ]
+                'good',
+                'true',
+                2009
         ),
-        Actors(
-            actor = 'Brad Pitt',
-            actor_id = 'nm0000093',
-            films = [
-                {'year': 2009, 'film': "Inglourious Basterds", 'votes': 1285359, 'rating': 8.3, 'film_id':"tt0361748"},
-                {'year': 2008, 'film': "The Curious Case of Benjamin Button", 'votes': 595444, 'rating': 7.8, 'film_id': "tt0421715"},
-                {'year': 2008, 'film': "Burn After Reading", 'votes': 312495, 'rating': 7, 'film_id': "tt0887883"}
-            ],
-            quality_class = 'star',
-            is_active = 'true',
-            current_year = 2009
+        Actors('Brad Pitt',
+                'nm0000093',
+                [Films(2009, "Inglourious Basterds", 1285359, 8.3, "tt0361748"),
+                 Films(2008, "he Curious Case of Benjamin Button", 595444, 7.8, "tt0421715"),
+                 Films(2008, "Burn After Reading", 312495, 7, "tt0887883")
+                ],
+                'star',
+                'true',
+                2009
         ),
-        Actors(
-            actor = 'Kevin Bacon',
-            actor_id = 'nm0000102',
-            films = [
-                {'year': 2009, 'film': "My One and Only", 'votes': 8538, 'rating': 6.5, 'film_id':"tt1185431"},
-                {'year': 2008, 'film': "Frost/Nixon", 'votes': 103893, 'rating': 7.7, 'film_id': "tt0870111"}
-            ],
-            quality_class = 'good',
-            is_active = 'true',
-            current_year = 2009
+        Actors('Kevin Bacon',
+                'nm0000102',
+                [Films(2009, "My One and Only", 8538, 6.5, "tt1185431"),
+                 Films(2009, "Frost/Nixon", 103893, 7.7, "tt0870111")
+                ],
+                'good',
+                'true',
+                2009
         )
     ]
 
@@ -84,11 +79,6 @@ def test_job_2(spark):
         devices(-2012543895, 'Googlebot', 'Other', 'Spider'),
         devices(27181149, 'Chrome', 'Windows', 'Other'),
         devices(-290659081, 'bingbot', 'Other', 'Spider')
-    ]
-
-    input_data_cumulated = [
-        devices_cumulated(-2077270748, 'Googlebot', [date(2023, 1, 1)], date(2023, 1, 1)),
-        devices_cumulated(-2052853069, 'bingbot', [date(2023, 1, 1)], date(2023, 1, 1))
     ]
 
     expected_output = [
