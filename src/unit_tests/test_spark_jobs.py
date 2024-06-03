@@ -25,8 +25,8 @@ def test_scd_generation(spark):                 --Pyspark function to test input
     assert_df_equality(actual_df, expected_df)
 
 
-DeviceOutput = namedtuple(user_id, "browser_type", "dates_active", "date")         --format of deeptianievarghese22866.deeptianievarghese22866.user_devices_cumulated
-Device = namedtuple(user_id, "browser_type", "dates_active", "date")               --format of deeptianievarghese22866.deeptianievarghese22866.user_devices_cumulated
+DeviceOutput = namedtuple(user_id, "browser_type", "dates_active", "date")         --format of deeptianievarghese22866.user_devices_cumulated
+Device = namedtuple(user_id, "browser_type", "dates_active", "date")               --format of deeptianievarghese22866.user_devices_cumulated
 	
 
 def test_device_generation(spark):                    --Pyspark function to test input, output data for spark job to overwrite deeptianievarghese22866.user_devices_cumulated table                 
