@@ -11,7 +11,12 @@ def query_1(output_table_name: str, input_table_name: str, this_year: str) -> st
         AS 
         (
             SELECT
-             * 
+             actor,
+             actor_id,
+             films,
+             quality_class,
+             is_active,
+             cast(current_year as int) as current_year 
              FROM {output_table_name} 
             WHERE current_year = {previous_year}
         ),
@@ -20,11 +25,11 @@ def query_1(output_table_name: str, input_table_name: str, this_year: str) -> st
             SELECT
                 actor,
                 actor_id,
-                year AS current_year,
-                COLLECT_LIST(NAMED_STRUCT("film", film, "votes", votes, "rating", rating, "film_id", film_id)) AS films,
-                AVG(rating) AS rating
+                cast(year as int) AS current_year,
+                COLLECT_LIST(ARRAY(film,votes,rating, film_id,year)) AS films,
+                AVG(cast(rating as float)) AS rating
             FROM {input_table_name}
-            WHERE year = {this_year}
+            WHERE year = cast({this_year} as int)
             GROUP BY actor,
                      actor_id,
                      year
