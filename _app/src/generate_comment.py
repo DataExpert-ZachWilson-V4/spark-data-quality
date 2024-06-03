@@ -86,6 +86,7 @@ def get_prompts(assignment: str) -> dict:
             prompt_contents[prompt] = file.read()
     return prompt_contents
 
+
 def generate_system_prompt(prompts: dict):
     system_prompt = prompts['system_prompt.md']
     
@@ -97,35 +98,24 @@ def generate_system_prompt(prompts: dict):
     
     return system_prompt
 
+
 def generate_feedback_prompt(prompts: dict, submissions: dict) -> str:
     user_prompt = prompts['user_prompt_1.md']
     user_prompt += "\n\n"
-    
-    # user_prompt += "# Additional Information"
-    # user_prompt += f"\n\n{prompts['week_1_queries.md']}"
-    # user_prompt += f"\n\n{prompts['week_2_queries.md']}"
-    # user_prompt += f"\n\n{prompts['example_solution.md']}"
-    # user_prompt += "\n\n"
-    
+    user_prompt += "# Student's Solution\n"
+    user_prompt += "Please analyze the code below:\n"
     for file_name, submission in submissions.items():
-        user_prompt += "# Student's Solution"
-        user_prompt += f"Please analyze the following code in `{file_name}`:\n\n```\n{submission}\n```\n\n"
+        user_prompt += f"`{file_name}`:\n\n```\n{submission}\n```\n\n"
     return user_prompt
 
 
 def generate_grading_prompt(prompts: dict, submissions: dict) -> str:
     user_prompt = prompts['user_prompt_2.md']
     user_prompt += "\n\n"
-    
-    # user_prompt += "# Additional Information"
-    # user_prompt += f"\n\n{prompts['week_1_queries.md']}"
-    # user_prompt += f"\n\n{prompts['week_2_queries.md']}"
-    # user_prompt += f"\n\n{prompts['example_solution.md']}"
-    # user_prompt += "\n\n"
-    
+    user_prompt += "# Student's Solution\n"
+    user_prompt += "Please grade the code below:\n"
     for file_name, submission in submissions.items():
-        user_prompt += "# Student's Solution"
-        user_prompt += f"Please grade the following code in `{file_name}`:\n\n```\n{submission}\n```\n\n"
+        user_prompt += f"`{file_name}`:\n\n```\n{submission}\n```\n\n"
     return user_prompt
 
 
