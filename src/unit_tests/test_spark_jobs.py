@@ -1,12 +1,12 @@
 from chispa.dataframe_comparer import *
-from ..jobs.job_1 import job_1
+from ..jobs.job_1 import job_1    --read job_1 and job_2 functions from respective pyspark jobs
 from ..jobs.job2 import job_2
 from collections import namedtuple
-ActorSeason = namedtuple("actor", "actor_id","film votes rating film_id", "quality_class", is_active, current_year)
-ActorScd = namedtuple("actor", "quality_class", is_active, start_date, end_date, current_year)
+ActorSeason = namedtuple("actor", "actor_id","film votes rating film_id", "quality_class", is_active, current_year)  --format of deeptianievarghese22866.actors_history, the input table
+ActorScd = namedtuple("actor", "quality_class", is_active, start_date, end_date, current_year)                       --format of deeptianievarghese22866.actors_history_scd table, the output table
 
 
-def test_scd_generation(spark):
+def test_scd_generation(spark):                 --Pyspark function to test input, output data for spark job to overwrite deeptianievarghese22866.actors table
     source_data = [
         ActorSeason("Adam Rodriguez", "nm0735226", "Impostor", 22662, 6.2, "tt0160399", average, true, 2001),
         ActorSeason("Adrian Grenier", "nm0004978", "Harvard Man", 4225, 4.9, "tt0242508", average, true, 2001),
@@ -25,11 +25,11 @@ def test_scd_generation(spark):
     assert_df_equality(actual_df, expected_df)
 
 
-DeviceOutput = namedtuple(user_id, "browser_type", "dates_active", "date")
-Device = namedtuple(user_id, "browser_type", "dates_active", "date")
+DeviceOutput = namedtuple(user_id, "browser_type", "dates_active", "date")         --format of deeptianievarghese22866.deeptianievarghese22866.user_devices_cumulated
+Device = namedtuple(user_id, "browser_type", "dates_active", "date")               --format of deeptianievarghese22866.deeptianievarghese22866.user_devices_cumulated
 	
 
-def test_device_generation(spark):
+def test_device_generation(spark):                    --Pyspark function to test input, output data for spark job to overwrite deeptianievarghese22866.user_devices_cumulated table                 
     input_data = [
         Device(5890109, "curl", ["2023-01-09"], "2023-01-09"),
         Device(696863716, "Other", ["2023-01-09"], "2023-01-09")
