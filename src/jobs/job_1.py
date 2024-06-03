@@ -1,15 +1,6 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    LongType,
-    IntegerType,
-    ArrayType,
-    FloatType,
-)
 
 
 def query_1(

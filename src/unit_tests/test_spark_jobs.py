@@ -103,20 +103,12 @@ def test_job1(spark_session) -> None:
         ]
     )
     actor_films_1914_df = spark.createDataFrame(actor_films_1914, schema=input_schema)
-    # Since this Query is a cumulative insertion query we need to create
-    # the output table schema as a view before running the query to avoid
-    # the error of the table not existing
+    # Since this Query is a cumulative insertion query
     actors_1914_df = spark.createDataFrame(actors_1914, schema=output_schema)
     actors_1914_df.createOrReplaceTempView("actors")
 
     # Run query
-    query_1914_output = job_1(
-        spark_session=spark,
-        dataframe=actor_films_1914_df,
-        output_table_name="actors",
-        input_table_name="actor_films",
-        last_year=1913,
-    )
+    query_1914_output = job_1(spark, actor_films_1914_df, "actors", "actor_films", 1913)
     # Check the output of the query
     assert_df_equality(query_1914_output, actors_1914_df)
 
@@ -356,9 +348,7 @@ def test_job2(spark_session) -> None:
     )
     # Run the query
     query_output = job_2(
-        spark_session=spark_session("job_2"),
-        dataframe=nba_game_details_df,
-        input_table_name="nba_game_details",
+        spark_session("job_2"), "nba_game_details", nba_game_details_df
     )
     # Check the output of the query
     assert_df_equality(query_output, nba_game_details_deduped_df)
