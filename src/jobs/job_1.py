@@ -8,14 +8,11 @@ def query_1(input_table_name: str) -> str:
         SELECT
             *,
             CAST(ROW_NUMBER() OVER (PARTITION BY game_id, team_id, player_id ORDER BY game_id, team_id, player_id) AS LONG) AS rn
-            -- We have to differentiate the rows with the same game_id, team_id, and player_id.
-            -- That's why we use the ROW_NUMBER() function and partitioned by the columns mentioned.
-        FROM {input_table_name} -- Lab 1 - Fact Table
+        FROM {input_table_name}
     )
     SELECT *
     FROM rn_marking
     WHERE rn = 1
-    -- We take the first repeated row and discard the rest.
     """
     return query
 

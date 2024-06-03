@@ -8,9 +8,6 @@ def query_2(input_table_name: str) -> str:
         SELECT *
         FROM {input_table_name}
         WHERE date = '2023-01-04'
-        -- We take the data from the last day cumulated. 
-        -- Because it will have the most up-to-date information.
-        -- And all the data we need to build a binary history.
     ),
     date_list_int AS (
         SELECT
@@ -24,19 +21,13 @@ def query_2(input_table_name: str) -> str:
                     END
                 ) AS BIGINT
             ) AS history_int
-            -- Sums the powers of 2 for each date in the dates_active array.
-            -- (We did 31 and not 32 bits, because one bit is the sign bit).
-            -- This will get us a binary representation of the dates_active array.
-            -- 1 if the date is present, 0 if it is not. From left to right most oldest to recent date.
         FROM today
         LATERAL VIEW explode(sequence(to_date('2023-01-01'), to_date('2023-01-04'))) AS sequence_date 
-        -- LATERAL VIEW explode replaces TRINO's CROSS JOIN UNNEST.
         GROUP BY user_id, browser_type
     )
     SELECT
         *,
         bin(history_int) AS history_in_binary
-        -- Converts the integer to its binary string representation.
     FROM date_list_int
     """
     return query
