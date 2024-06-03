@@ -70,8 +70,8 @@ def get_prompts(assignment: str) -> dict:
     prompts = [
         'example_solution.md',
         'system_prompt.md',
-        'user_prompt_1.md',
-        'user_prompt_2.md',
+        'user_prompt_jobs.md',
+        'user_prompt_tests.md',
         'week_1_queries.md',
         'week_2_queries.md',
     ]
