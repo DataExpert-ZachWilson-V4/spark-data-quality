@@ -47,7 +47,7 @@ def query_1(input_table_name_actors: str, input_table_name_films: str) -> str:
         CASE
             WHEN ts.year IS NULL THEN ls.films  -- Use last year's films if no films for the current year
             WHEN ts.year IS NOT NULL AND ls.films IS NULL THEN ts.films  -- Use current year's films if no last year's films
-            WHEN ts.year IS NOT NULL AND ls.films IS NOT NULL THEN array_distinct(array_union(ts.films, ls.films))      -- Concatenate films if both years have films
+            WHEN ts.year IS NOT NULL AND ls.films IS NOT NULL THEN array_union(ts.films, ls.films)      -- Concatenate films if both years have films
         END AS films,
         ts.average_rating,
         CASE
@@ -64,13 +64,15 @@ def query_1(input_table_name_actors: str, input_table_name_films: str) -> str:
     """
     return query
 
-def job_1(spark_session: SparkSession, input_actors_df: DataFrame,input_films_df: DataFrame ):
+def job_1(spark_session: SparkSession, input_films_df: DataFrame, input_actors_df: DataFrame):
     input_table_name_actors = "actors"
     input_table_name_films = "actor_films"
     input_actors_df.createOrReplaceTempView(input_table_name_actors)
     input_films_df.createOrReplaceTempView(input_table_name_films)
-    input_films_df = spark_session.sql(query_1(input_table_name_actors, input_table_name_films)) 
-    return input_films_df
+    input_actors_df = spark_session.sql(query_1(input_table_name_actors, input_table_name_films)) 
+    
+    #input_actors_df.printSchema()
+    return input_actors_df
 
 def main():
     output_table_name: str = "amaliah21315.actors"
