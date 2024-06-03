@@ -7,14 +7,6 @@ from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
 
 
-@pytest.fixture(scope="session")
-def spark_session():
-    return SparkSession.builder \
-        .master("local") \
-        .appName("pytest") \
-        .getOrCreate()
-
-
 def to_dt(date_str: str, is_date: bool = False) -> datetime:
     try:
         if is_date:
@@ -26,8 +18,7 @@ def to_dt(date_str: str, is_date: bool = False) -> datetime:
 
 
 def convert_row_to_tuple(row: Any) -> tuple:
-    # Convert nested lists to tuples to make them hashable
-    row_dict = row.asDict()
+   row_dict = row.asDict()
     row_dict['films'] = tuple(tuple(film) for film in row_dict['films'])
     return tuple(row_dict.values())
 
@@ -96,11 +87,9 @@ def test_job_2(spark_session: SparkSession) -> None:
         {"actor_id": "nm0949835", "actor": "Loretta Young", "films": [["tt0012675", "The Sheik", 1921, 3127, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921}
     ]
 
-    # Create DataFrame for actor films
     actor_films_df = spark_session.createDataFrame(actor_films)
     actor_films_df.createOrReplaceTempView("mock_actor_films")
 
-    # Define schema for expected actors history
     schema = StructType([
         StructField("actor_id", StringType(), True),
         StructField("actor", StringType(), True),
@@ -111,10 +100,8 @@ def test_job_2(spark_session: SparkSession) -> None:
     ])
     expected_actors_history_df: DataFrame = spark_session.createDataFrame(actors_history, schema)
 
-    # Test the job_2 function with the inputs given
     actual_actors_history_df = job_2(spark_session, "mock_actor_films")
 
-    # Convert DataFrames to sets of rows for comparison
     expected_set = set([convert_row_to_tuple(row) for row in expected_actors_history_df.collect()])
     actual_set = set([convert_row_to_tuple(row) for row in actual_actors_history_df.collect()])
 
@@ -124,4 +111,3 @@ def test_job_2(spark_session: SparkSession) -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__])
-
