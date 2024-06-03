@@ -25,34 +25,30 @@ def test_job_1(spark_session) -> None:
         {"user_id": 1919317753, "device_id": 532630305, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:38"},
         {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:39"},
         {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:40"},
-        {"user_id": 1919317753, "device_id": 532630305, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:41"},
-        {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:41"},
-        {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:42"},
-        {"user_id": 1919317753, "device_id": 532630305, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:43"},
-        {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:43"}
+        {"user_id": 1919317753, "device_id": 532630305, "host": "admin.zachwilson.tech", "event_time": "2023-01-14 14:44:41"},
     ]
 
-    web_events_df: DataFrame = spark_session.createDataFrame(web_events)
-    web_events_df.createOrReplaceTempView("sample_web_events")
+    we_df: DataFrame = spark_session.createDataFrame(web_events)
+    we_df.createOrReplaceTempView("sample_web_events")
 
     devices = [
         {"device_id": 532630305, "browser_type": "Other", "os_type": "Other", "device_type": "Other"},
         {"device_id": -189493684, "browser_type": "Chrome", "os_type": "Windows", "device_type": "Other"}
     ]
 
-    devices_df: DataFrame = spark_session.createDataFrame(devices)
-    devices_df.createOrReplaceTempView("sample_devices")
+    d_df: DataFrame = spark_session.createDataFrame(devices)
+    d_df.createOrReplaceTempView("sample_devices")
 
     event_dt = to_dt('2023-01-14', is_date=True)
-    user_devices = [
+    uds = [
         {"user_id": 1919317753, "browser_type": "Other", "dates_active": [event_dt], "date": event_dt},
         {"user_id": 1919317753, "browser_type": "Chrome", "dates_active": [event_dt], "date": event_dt},
     ]
     schema = "user_id: bigint, browser_type: string, dates_active: array<date>, date: date"
-    expected_user_devices_df: DataFrame = spark_session.createDataFrame(user_devices, schema)
-    expected_user_devices_df.createOrReplaceTempView("sample_user_devices")
+    eud_df: DataFrame = spark_session.createDataFrame(uds, schema)
+    eud_df.createOrReplaceTempView("sample_user_devices")
 
-    actual_user_devices_df = job_1(
+    aud_df = job_1(
         spark_session,
         "sample_web_events",
         "sample_devices",
@@ -60,7 +56,7 @@ def test_job_1(spark_session) -> None:
         '2023-01-14'
     )
 
-    assert actual_user_devices_df.collect() == expected_user_devices_df.collect()
+    assert aud_df.collect() == eud_df.collect()
 
 
 def test_job_2(spark_session: SparkSession) -> None:
