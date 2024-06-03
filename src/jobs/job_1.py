@@ -5,33 +5,33 @@ from pyspark.sql.dataframe import DataFrame
 
 
 def query_1(
-        events_input_table_name: str,
-        devices_input_table_name: str,
-        output_table_name: str,
-        current_date: str) -> str:
-    dt = datetime.strptime(current_date, "%Y-%m-%d")
-    previous_date = dt - timedelta(days=1)
-    previous_date_str = previous_date.strftime("%Y-%m-%d")
+        etn: str,
+        dtn: str,
+        otn: str,
+        cd: str) -> str:
+    dt = datetime.strptime(cd, "%Y-%m-%d")
+    pd = dt - timedelta(days=1)
+    pd_s = pd.strftime("%Y-%m-%d")
 
 
     query = f"""
     WITH yesterday AS (
         SELECT *
         FROM 
-            {output_table_name}
+            {otn}
         WHERE 
-            date = DATE('{previous_date_str}')
+            date = DATE('{pd_s}')
     ),
     today AS (
         SELECT
             we.user_id,
             d.browser_type,
-            DATE('{current_date}') as todays_date,
+            DATE('{cd}') as todays_date,
             ARRAY_AGG(DATE(we.event_time)) AS event_dates
         FROM
-            {devices_input_table_name} d
-            JOIN {events_input_table_name} we ON d.device_id = we.device_id
-        WHERE DATE(we.event_time) = DATE('{current_date}')
+            {dtn} d
+            JOIN {etn} we ON d.device_id = we.device_id
+        WHERE DATE(we.event_time) = DATE('{cd}')
         GROUP BY we.user_id, d.browser_type
     )
     SELECT
@@ -55,27 +55,27 @@ def query_1(
 
 def job_1(
         spark_session: SparkSession,
-        events_input_table_name: str,
-        devices_input_table_name: str,
-        output_table_name: str,
-        current_date: str) -> Optional[DataFrame]:
+        etn: str,
+        dtn: str,
+        otn: str,
+        cd: str) -> Optional[DataFrame]:
 
-    output_df = spark_session.table(output_table_name)
-    output_df.createOrReplaceTempView(output_table_name)
+    odf = spark_session.table(otn)
+    odf.createOrReplaceTempView(otn)
 
-    result_df = spark_session.sql(
+    rdf = spark_session.sql(
         query_1(
-            events_input_table_name,
-            devices_input_table_name,
-            output_table_name,
-            current_date
+            etn,
+            dtn,
+            otn,
+            cd
         )
     )
-    return result_df
+    return rdf
 
 
 def main():
-    output_table_name: str = "user_devices_cumulated"
+    otn: str = "user_devices_cumulated"
 
     spark_session: SparkSession = (
         SparkSession.builder
@@ -84,7 +84,7 @@ def main():
         .getOrCreate()
     )
 
-    output_df = job_1(
+    odf = job_1(
         spark_session,
         "web_events",
         "user_devices",
@@ -92,8 +92,8 @@ def main():
         "2023-01-14"
     )
 
-    if output_df is not None:
-        output_df.write.mode("overwrite").insertInto(output_table_name)
+    if odf is not None:
+        odf.write.mode("overwrite").insertInto(otn)
     else:
         print("No DataFrame to write to the output table.")
 
