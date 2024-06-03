@@ -53,7 +53,7 @@ def job_2(spark_session: SparkSession, output_table_name: str, current_date: dat
 
 def main():
     output_table_name: str = "user_devices_cumulated"
-    current_date = '2021-03-25'
+    current_date = '2021-03-20'
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
