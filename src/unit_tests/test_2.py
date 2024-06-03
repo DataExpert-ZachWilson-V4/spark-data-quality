@@ -15,10 +15,7 @@ UserBinaryActivity = namedtuple(
 
 input_data = [
     UserDevicesCumulated(
-        user_id=1,
-        browser_type="Chrome",
-        dates_active=[date(2023,1,2)],
-        date= date(2023,1,4)
+        user_id=1, browser_type="Chrome", dates_active=[date(2023,1,2)],date= date(2023,1,4)
     ),
 ]
 
@@ -28,10 +25,7 @@ def test_job_2(spark_session):
     actual_output_data = job_2(spark_session, fake_input_data)
     expected_output_data = [
         UserBinaryActivity(
-            user_id=1,
-            browser_type="Chrome",
-            history_int=536870912,
-            history_in_binary="100000000000000000000000000000"
+            user_id=1, browser_type="Chrome", history_int=536870912, history_in_binary="100000000000000000000000000000"
         ),
     ]
     expected_output_data_df = spark_session.createDataFrame(expected_output_data)
