@@ -6,19 +6,16 @@ from typing import Any
 from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
 
-
 def to_dt(date_str: str, is_date: bool = False) -> datetime:
     if is_date:
         return datetime.strptime(date_str, "%Y-%m-%d").date()
     else:
         return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 
-
 def convert_row_to_tuple(row: Any) -> tuple:
     row_dict = row.asDict()
     row_dict['films'] = tuple(tuple(film) for film in row_dict['films'])
     return tuple(row_dict.values())
-
 
 def test_job_1(spark_session) -> None:
     web_events = [
@@ -27,18 +24,14 @@ def test_job_1(spark_session) -> None:
         {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:40"},
         {"user_id": 1919317753, "device_id": 532630305, "host": "admin.zachwilson.tech", "event_time": "2023-01-14 14:44:41"},
     ]
-
     we_df: DataFrame = spark_session.createDataFrame(web_events)
     we_df.createOrReplaceTempView("mock_events")
-
     devices = [
         {"device_id": 532630305, "browser_type": "Other", "os_type": "Other", "device_type": "Other"},
         {"device_id": -189493684, "browser_type": "Chrome", "os_type": "Windows", "device_type": "Other"}
     ]
-
     d_df: DataFrame = spark_session.createDataFrame(devices)
     d_df.createOrReplaceTempView("mock_devices")
-
     event_dt = to_dt('2023-01-14', is_date=True)
     uds = [
         {"user_id": 1919317753, "browser_type": "Other", "dates_active": [event_dt], "date": event_dt},
@@ -47,7 +40,6 @@ def test_job_1(spark_session) -> None:
     schema = "user_id: bigint, browser_type: string, dates_active: array<date>, date: date"
     eud_df: DataFrame = spark_session.createDataFrame(uds, schema)
     eud_df.createOrReplaceTempView("mock_user_devices")
-
     aud_df = job_1(
         spark_session,
         "mock_events",
@@ -55,9 +47,7 @@ def test_job_1(spark_session) -> None:
         "mock_user_devices",
         '2023-01-14'
     )
-
     assert aud_df.collect() == eud_df.collect()
-
 
 def test_job_2(spark_session: SparkSession) -> None:
     actor_films = [
@@ -81,15 +71,12 @@ def test_job_2(spark_session: SparkSession) -> None:
         StructField("current_year", IntegerType(), True)
     ])
     eah_df: DataFrame = spark_session.createDataFrame(actors_history, schema)
-
     aah_df = job_2(spark_session, "mock_actor_films")
-
     expected_set = set([convert_row_to_tuple(row) for row in eah_df.collect()])
     actual_set = set([convert_row_to_tuple(row) for row in aah_df.collect()])
 
     assert expected_set == actual_set, \
         f"Actor history mismatch. \nExpected: {eah_df.collect()} \nActual: {aah_df.collect()}"
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

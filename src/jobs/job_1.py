@@ -3,36 +3,17 @@ from datetime import datetime, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-
-def query_1(
-        etn: str,
-        dtn: str,
-        otn: str,
-        cd: str) -> str:
+def query_1(etn: str, dtn: str,  otn: str, cd: str) -> str:
     dt = datetime.strptime(cd, "%Y-%m-%d")
     pd = dt - timedelta(days=1)
     pd_s = pd.strftime("%Y-%m-%d")
 
 
     query = f"""
-    WITH yesterday AS (
-        SELECT *
-        FROM 
-            {otn}
-        WHERE 
-            date = DATE('{pd_s}')
-    ),
+    WITH yesterday AS ( SELECT * FROM {otn} WHERE date = DATE('{pd_s}') ),
     today AS (
-        SELECT
-            we.user_id,
-            d.browser_type,
-            DATE('{cd}') as todays_date,
-            ARRAY_AGG(DATE(we.event_time)) AS event_dates
-        FROM
-            {dtn} d
-            JOIN {etn} we ON d.device_id = we.device_id
-        WHERE DATE(we.event_time) = DATE('{cd}')
-        GROUP BY we.user_id, d.browser_type
+        SELECT we.user_id, d.browser_type, DATE('{cd}') as todays_date, ARRAY_AGG(DATE(we.event_time)) AS event_dates
+        FROM {dtn} d JOIN {etn} we ON d.device_id = we.device_id WHERE DATE(we.event_time) = DATE('{cd}') GROUP BY we.user_id, d.browser_type
     )
     SELECT
         COALESCE(yesterday.user_id, today.user_id) AS user_id,
@@ -45,58 +26,27 @@ def query_1(
         END AS dates_active,
         COALESCE(today.todays_date, yesterday.date + INTERVAL 1 DAY) AS date
     FROM
-        yesterday
-        FULL OUTER JOIN today
-        ON yesterday.user_id = today.user_id
-        AND yesterday.browser_type = today.browser_type
+        yesterday FULL OUTER JOIN today ON yesterday.user_id = today.user_id AND yesterday.browser_type = today.browser_type
     """
     return query
 
-
-def job_1(
-        spark_session: SparkSession,
-        etn: str,
-        dtn: str,
-        otn: str,
-        cd: str) -> Optional[DataFrame]:
-
+def job_1( spark_session: SparkSession, etn: str, dtn: str, otn: str, cd: str) -> Optional[DataFrame]:
     odf = spark_session.table(otn)
     odf.createOrReplaceTempView(otn)
-
-    rdf = spark_session.sql(
-        query_1(
-            etn,
-            dtn,
-            otn,
-            cd
-        )
-    )
+    rdf = spark_session.sql(query_1(etn,dtn,otn,cd))
     return rdf
-
 
 def main():
     otn: str = "user_devices_cumulated"
 
-    spark_session: SparkSession = (
-        SparkSession.builder
-        .master("local")
-        .appName("job_1")
-        .getOrCreate()
-    )
+    spark_session: SparkSession = (SparkSession.builder.master("local").appName("job_1").getOrCreate())
 
-    odf = job_1(
-        spark_session,
-        "web_events",
-        "user_devices",
-        "user_devices_cumulated",
-        "2023-01-14"
-    )
+    odf = job_1(spark_session,"web_events","user_devices","user_devices_cumulated","2023-01-14")
 
     if odf is not None:
         odf.write.mode("overwrite").insertInto(otn)
     else:
         print("No DataFrame to write to the output table.")
-
 
 if __name__ == "__main__":
     main()
