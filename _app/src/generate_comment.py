@@ -5,6 +5,7 @@ import requests
 import boto3
 from util import get_logger, get_api_key, check_aws_creds, get_git_creds, get_assignment, get_submission_dir  #, get_changed_files
 from openai import OpenAI
+from openai.error import BadRequestError
 
 logger = get_logger()
 client = OpenAI(api_key=get_api_key())
@@ -128,25 +129,14 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
         )
         comment = response.choices[0].message.content
         return comment
-    except Exception as e:
+    except BadRequestError as e:
         error_message = str(e)
         if 'maximum context length' in error_message:
             return f"Error: The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {error_message}"
         else:
             return f"The following error occurred while requesting a response from ChatGPT: {error_message}"
-
-def get_response(system_prompt: str, user_prompt: str) -> str:
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0,
-    )
-    comment = response.choices[0].message.content
-    # text = f"This is a LLM-generated comment: \n{comment if comment else 'No feedback generated.'}"
-    return comment
+    except Exception as e:
+        return f"An unexpected error occurred: {str(e)}"
 
 def post_github_comment(git_token, repo, pr_number, comment):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
