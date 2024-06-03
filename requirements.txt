@@ -2,3 +2,6 @@ chispa
 pytest
 pyspark
 pyspark[sql]
+flake8 
+pylint 
+black
