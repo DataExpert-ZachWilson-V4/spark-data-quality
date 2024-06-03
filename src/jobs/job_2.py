@@ -4,27 +4,11 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_2(input_table_name: str, base_table: str, date: str) -> str:
     query = f"""
-        WITH
-            yesterday AS (
-                SELECT
-                    *
-                FROM
-                    {input_table_name}
-                WHERE
-                    date = DATE_SUB(CAST('{date}' AS DATE), 1)
+        WITH yesterday AS (
+                SELECT * FROM {input_table_name} WHERE date = DATE_SUB(CAST('{date}' AS DATE), 1)
         ),
         today AS (
-            SELECT
-                host,
-                CAST(DATE_TRUNC('day', event_time) AS DATE) AS date,
-                COUNT(1)
-            FROM
-                {base_table}
-            WHERE
-                DATE_TRUNC('day', event_time) = DATE('{date}')
-            GROUP BY
-                host,
-                DATE_TRUNC('day', event_time)
+            SELECT host,CAST(DATE_TRUNC('day', event_time) AS DATE) AS date,COUNT(1) FROM {base_table} WHERE DATE_TRUNC('day', event_time) = DATE('{date}') GROUP BY host,DATE_TRUNC('day', event_time)
         )
         SELECT
         COALESCE(y.host, t.host) AS host,
@@ -37,10 +21,5 @@ def query_2(input_table_name: str, base_table: str, date: str) -> str:
     """
     return query
 
-def job_2(
-      spark_session: SparkSession, 
-      input_table_name: str,
-      base_table: str,
-      date: str
-) -> Optional[DataFrame]:
+def job_2(spark_session: SparkSession, input_table_name: str,base_table: str,date: str) -> Optional[DataFrame]:
   return spark_session.sql(query_2(input_table_name, base_table, date))
