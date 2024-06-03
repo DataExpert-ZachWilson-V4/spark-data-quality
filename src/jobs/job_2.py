@@ -16,8 +16,7 @@ def query_2(input_table_name: str, base_table: str, date: str) -> str:
             WHEN y.host_activity_datelist IS NOT NULL THEN ARRAY(t.date) || y.host_activity_datelist
             ELSE ARRAY(t.date) END AS host_activity_datelist,
             DATE('{date}') AS date
-        FROM yesterday AS y
-        FULL OUTER JOIN today AS t ON y.host = t.host
+        FROM yesterday AS y FULL OUTER JOIN today AS t ON y.host = t.host
     """
     return query
 
