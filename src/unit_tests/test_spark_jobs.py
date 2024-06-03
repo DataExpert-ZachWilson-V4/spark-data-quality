@@ -1,6 +1,6 @@
 from chispa.dataframe_comparer import *
-from ..jobs.actors_history_scd_example import do_actor_scd_transformation
-from ..jobs.dedupe_nba_game_details import do_device_transformation
+from ..jobs.job_1 import job_1
+from ..jobs.job2 import job_2
 from collections import namedtuple
 ActorSeason = namedtuple("actor", "actor_id","film votes rating film_id", "quality_class", is_active, current_year)
 ActorScd = namedtuple("actor", "quality_class", is_active, start_date, end_date, current_year)
@@ -15,7 +15,7 @@ def test_scd_generation(spark):
     ]
     source_df = spark.createDataFrame(source_data)
 
-    actual_df = do_actor_scd_transformation(spark, source_df)
+    actual_df = job_1(spark, source_df)
     expected_data = [
         ActorScd("Adam Garcia","average", true, 2001, 2001, 2021),
         ActorScd("Albert Brooks", 'good', true, 2001, 2001, 2021),
@@ -36,7 +36,7 @@ def test_device_generation(spark):
     ]
 
     input_dataframe = spark.createDataFrame(input_data)
-    actual_df2 = do_device_transformation(spark, input_dataframe)
+    actual_df2 = job_2(spark, input_dataframe)
     expected_output = [
         DeviceOutput(1867926153, "Googlebot", ["2023-01-09"], "2023-01-09")
     ]
