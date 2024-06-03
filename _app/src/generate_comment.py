@@ -118,24 +118,23 @@ def generate_grading_prompt(prompts: dict, submissions: dict) -> str:
 
 def get_response(system_prompt: str, user_prompt: str) -> str:
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0,
+        response = client.chat.completions.create(
+          model="gpt-4",
+          messages=[
+              {"role": "system", "content": system_prompt},
+              {"role": "user", "content": user_prompt},
+          ],
+          temperature=0,
         )
         comment = response.choices[0].message.content
         return True, comment
-    except openai.error.BadRequestError as e:
+    except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         if 'maximum context length' in str(e):
             return False, f"The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {str(e)}"
         else:
             return False, f"The following error occurred while requesting a response from ChatGPT: {str(e)}"
-    except Exception as e:
-        return False, f"An unexpected error occurred: {str(e)}"
+
     
 # def get_response(system_prompt: str, user_prompt: str) -> str:
 #     response = client.chat.completions.create(
