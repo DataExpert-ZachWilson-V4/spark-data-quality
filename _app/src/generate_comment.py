@@ -171,16 +171,16 @@ def main():
     feedback_prompt = generate_feedback_prompt(prompts, submissions)
     feedback_passed, feedback_comment = get_response(system_prompt, feedback_prompt)
     if feedback_passed:
-        final_comment += f"# ChatGPT Generated Feedback:\n{feedback_comment}\n"
+        final_comment += f"# ChatGPT Generated Feedback:\n{feedback_comment}\n\n"
     else:
-        return f"**Error generating feedback**:\n{feedback_comment}\n\n"
+        final_comment += f"**Error generating feedback**:\n{feedback_comment}\n\n"
     
     grading_prompt = generate_grading_prompt(prompts, submissions)
     grading_passed, grading_comment = get_response(system_prompt, grading_prompt)
     if grading_passed:
-        final_comment += f"# ChatGPT Grading Rubric Evaluation:\n{grading_comment}\n"
+        final_comment += f"# ChatGPT Grading Rubric Evaluation:\n{grading_comment}\n\n"
     else:
-        return f"**Error generating grading rubric:**\n{grading_comment}\n\n"
+        final_comment += f"**Error generating grade:**\n{grading_comment}\n\n"
     
     if git_token and repo and pr_number:
         post_github_comment(git_token, repo, pr_number, final_comment)
