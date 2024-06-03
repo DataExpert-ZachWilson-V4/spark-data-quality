@@ -70,7 +70,7 @@ jobs:
             echo "----------------------------------------------------------------------------------"
             exit 1
           fi
-
+      
   check_files:
     name: 'Check files changed'
     runs-on: ubuntu-latest
@@ -99,7 +99,7 @@ jobs:
             .github/**/*
             _app/**
             Dockerfile
-
+      
       - name: Get changed files in PR and push
         id: filtered-changed-files
         run: |
