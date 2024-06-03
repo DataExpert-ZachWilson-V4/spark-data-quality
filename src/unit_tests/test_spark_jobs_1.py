@@ -6,9 +6,7 @@ from pyspark.sql.types import (
     StructField,
     StringType,
     IntegerType,
-    LongType,
     DoubleType,
-    ArrayType,
     BooleanType,
 )
 
