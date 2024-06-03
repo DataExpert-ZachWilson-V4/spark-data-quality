@@ -137,18 +137,18 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
     except Exception as e:
         return False, f"An unexpected error occurred: {str(e)}"
     
-def get_response(system_prompt: str, user_prompt: str) -> str:
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0,
-    )
-    comment = response.choices[0].message.content
-    # text = f"This is a LLM-generated comment: \n{comment if comment else 'No feedback generated.'}"
-    return comment
+# def get_response(system_prompt: str, user_prompt: str) -> str:
+#     response = client.chat.completions.create(
+#         model="gpt-4",
+#         messages=[
+#             {"role": "system", "content": system_prompt},
+#             {"role": "user", "content": user_prompt},
+#         ],
+#         temperature=0,
+#     )
+#     comment = response.choices[0].message.content
+#     # text = f"This is a LLM-generated comment: \n{comment if comment else 'No feedback generated.'}"
+#     return comment
 
 def post_github_comment(git_token, repo, pr_number, comment):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
