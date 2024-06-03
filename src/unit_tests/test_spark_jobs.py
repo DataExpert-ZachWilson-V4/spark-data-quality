@@ -71,20 +71,11 @@ def test_job_2(spark_session: SparkSession) -> None:
         {"actor": "Milton Berle", "actor_id": "nm0000926", "film": "Little Lord Fauntleroy", "year": 1921, "votes": 283, "rating": 6.7, "film_id": "tt0012397"},
         {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "A Sailor-Made Man", "year": 1921, "votes": 972, "rating": 6.9, "film_id": "tt0012642"},
         {"actor": "Marion Davies", "actor_id": "nm0203836", "film": "Enchantment", "year": 1921, "votes": 275, "rating": 6.4, "film_id": "tt0012136"},
-        {"actor": "Marion Davies", "actor_id": "nm0203836", "film": "Buried Treasure", "year": 1921, "votes": 168, "rating": 6.4, "film_id": "tt0012016"},
-        {"actor": "Lillian Gish", "actor_id": "nm0001273", "film": "Orphans of the Storm", "year": 1921, "votes": 4797, "rating": 7.3, "film_id": "tt0012532"},
-        {"actor": "Gloria Swanson", "actor_id": "nm0841797", "film": "The Affairs of Anatol", "year": 1921, "votes": 1215, "rating": 6.6, "film_id": "tt0011909"},
-        {"actor": "Charles Chaplin", "actor_id": "nm0000122", "film": "The Kid", "year": 1921, "votes": 115152, "rating": 8.3, "film_id": "tt0012349"},
-        {"actor": "Loretta Young", "actor_id": "nm0949835", "film": "The Sheik", "year": 1921, "votes": 3127, "rating": 6.4, "film_id": "tt0012675"}
     ]
     actors_history = [
         {"actor_id": "nm0000926", "actor": "Milton Berle", "films": [["tt0012397", "Little Lord Fauntleroy", 1921, 283, 6.7]], "quality_class": "average", "is_active": True, "current_year": 1921},
         {"actor_id": "nm0516001", "actor": "Harold Lloyd", "films": [["tt0012642", "A Sailor-Made Man", 1921, 972, 6.9]], "quality_class": "average", "is_active": True, "current_year": 1921},
         {"actor_id": "nm0203836", "actor": "Marion Davies", "films": [["tt0012136", "Enchantment", 1921, 275, 6.4], ["tt0012016", "Buried Treasure", 1921, 168, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921},
-        {"actor_id": "nm0001273", "actor": "Lillian Gish", "films": [["tt0012532", "Orphans of the Storm", 1921, 4797, 7.3]], "quality_class": "good", "is_active": True, "current_year": 1921},
-        {"actor_id": "nm0841797", "actor": "Gloria Swanson", "films": [["tt0011909", "The Affairs of Anatol", 1921, 1215, 6.6]], "quality_class": "average", "is_active": True, "current_year": 1921},
-        {"actor_id": "nm0000122", "actor": "Charles Chaplin", "films": [["tt0012349", "The Kid", 1921, 115152, 8.3]], "quality_class": "star", "is_active": True, "current_year": 1921},
-        {"actor_id": "nm0949835", "actor": "Loretta Young", "films": [["tt0012675", "The Sheik", 1921, 3127, 6.4]], "quality_class": "average", "is_active": True, "current_year": 1921}
     ]
 
     actor_films_df = spark_session.createDataFrame(actor_films)
