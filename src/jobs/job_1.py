@@ -17,7 +17,7 @@ def query_1(
         output_table_name: str,
         current_date: str) -> str:
     """
-    Generates an SQL query to aggregate user device events by date.
+    Generates a SQL query to aggregate user device events by date.
 
     Parameters:
     events_input_table_name (str): The name of the events input table.
@@ -39,8 +39,10 @@ def query_1(
     query = f"""
     WITH yesterday AS (
         SELECT *
-        FROM {output_table_name}
-        WHERE date = DATE('{previous_date_str}')
+        FROM 
+            {output_table_name}
+        WHERE 
+            date = DATE('{previous_date_str}')
     ),
     today AS (
         SELECT
