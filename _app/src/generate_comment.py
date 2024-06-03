@@ -142,29 +142,25 @@ def main():
     
     jobs_submissions = {file_name: submission for file_name, submission in submissions.items() if '/jobs/' in file_name}
     tests_submissions = {file_name: submission for file_name, submission in submissions.items() if '/unit_tests/' in file_name}
-
-    feedback_comment = ''
-    grading_comment = ''
+    
+    jobs_comment = ''
+    tests_comment = ''
     
     if jobs_submissions:
         jobs_feedback_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'analyze')
-        jobs_feedback = get_response(system_prompt, jobs_feedback_prompt)
-        feedback_comment += jobs_feedback
-    
+        feedback_comment = get_response(system_prompt, jobs_feedback_prompt)
         jobs_grading_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'grade')
-        jobs_grading = get_response(system_prompt, jobs_grading_prompt)
-        grading_comment += jobs_grading
+        grading_comment = get_response(system_prompt, jobs_grading_prompt)
+        jobs_comment += f"## Feedback:\n{feedback_comment}\n\n## Grading Rubric Evaluation:\n{grading_comment}"
 
     if tests_submissions:
         tests_feedback_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'analyze')
-        tests_feedback = get_response(system_prompt, tests_feedback_prompt)
-        feedback_comment += tests_feedback
-    
+        feedback_comment = get_response(system_prompt, tests_feedback_prompt)
         tests_grading_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'grade')
-        tests_grading = get_response(system_prompt, tests_grading_prompt)
-        grading_comment += tests_grading
+        grading_comment = get_response(system_prompt, tests_grading_prompt)
+        tests_comment += f"## Feedback:\n{feedback_comment}\n\n## Grading Rubric Evaluation:\n{grading_comment}"
 
-    final_comment = f"### Feedback:\n{feedback_comment}\n\n### Grade:\n{grading_comment}"
+    final_comment = f"# PySpark Jobs:\n{jobs_comment}\n\n# Unit Tests:\n{tests_comment}"
 
     if git_token and repo and pr_number:
         post_github_comment(git_token, repo, pr_number, final_comment)
