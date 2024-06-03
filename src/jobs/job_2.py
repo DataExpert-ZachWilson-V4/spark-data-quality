@@ -4,7 +4,55 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_2(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+        WITH last_year AS ( -- CTE to extract the changing dimensions tracked for current and previous year
+        SELECT
+            actor,
+            actor_id,
+            quality_class,
+            lag(quality_class) OVER (
+                PARTITION BY actor
+                ORDER BY current_year
+            ) AS prev_quality_class,
+            is_active,
+            lag(is_active) OVER (
+                PARTITION BY actor
+                ORDER BY current_year
+            ) AS prev_is_active,
+            current_year
+        FROM {output_table_name}
+    ),
+    result AS ( -- CTE to track if anything changed between previous and current year
+        SELECT
+            actor,
+            actor_id,
+            quality_class,
+            prev_quality_class,
+            is_active,
+            prev_is_active,
+            SUM(
+                CASE
+                    WHEN quality_class <> prev_quality_class
+                    OR is_active <> prev_is_active THEN 1
+                    ELSE 0
+                END
+            ) OVER (
+                PARTITION BY actor
+                ORDER BY
+                    current_year
+            ) AS did_change,
+            current_year
+        FROM last_year
+    )
+    -- Build the final query to be loaded into SCD table
+    SELECT
+        DISTINCT actor,
+        actor_id,
+        quality_class,
+        is_active,
+        min(current_year) OVER (PARTITION BY actor, did_change) AS start_date,
+        max(current_year) OVER (PARTITION BY actor, did_change) AS end_date,
+        max(current_year) OVER () AS current_year
+    FROM result
     """
     return query
 
@@ -14,7 +62,7 @@ def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_2(output_table_name))
 
 def main():
-    output_table_name: str = "<output table name here>"
+    output_table_name: str = "actors"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
