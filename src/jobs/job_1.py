@@ -6,7 +6,6 @@ from pyspark.sql.dataframe import DataFrame
 def query_1(
     input_table_name: str, output_table_name: str, last_year: int = 1913
 ) -> str:
-    this_year = last_year + 1
     query = f"""
     WITH last_year as (
             SELECT *
@@ -20,7 +19,7 @@ def query_1(
                 avg(rating) as av_rating,
                 year
             FROM {input_table_name}
-            WHERE year = {this_year}
+            WHERE year = {last_year + 1}
             GROUP BY actor,
                 actor_id,
                 year
@@ -62,9 +61,7 @@ def job_1(
     input_table_name: str,
     last_year: int = 1914,
 ) -> Optional[DataFrame]:
-    # Setup the input table as a view
     dataframe.createOrReplaceTempView(input_table_name)
-    # Not setting up the output table as a view here because it's a Spark Query
     return spark_session.sql(
         query_1(
             input_table_name=input_table_name,

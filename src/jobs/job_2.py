@@ -25,6 +25,5 @@ def query_2(input_table_name: str) -> str:
 def job_2(
     spark_session: SparkSession, input_table_name: str, dataframe: DataFrame
 ) -> Optional[DataFrame]:
-    # Create a temporary view
     dataframe.createOrReplaceTempView(input_table_name)
     return spark_session.sql(query_2(input_table_name))
