@@ -5,12 +5,12 @@ from collections import namedtuple
 from datetime import date
 
 # Test 1 setup
-actor_films = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
-actor = namedtuple("Actor", "actor actor_id films quality_class is_active current_year")
+actor_films = namedtuple("ActorFilms", "actor, actor_id, film, year, votes, rating, film_id")
+actor = namedtuple("Actor", "actor, actor_id, films, quality_class, is_active, current_year")
 
 # Test 2 setup
-devices = namedtuple("Devices", "device_id browser_type dates_active event_count")
-web_events = namedtuple("WebEvents", "user_id device_id referrer host url event_time")
+devices = namedtuple("Devices", "device_id, browser_type, dates_active, event_count")
+web_events = namedtuple("WebEvents", "user_id, device_id, referrer, host, url, event_time")
 devices_cumulated = namedtuple(
     "DevicesCumulated", "user_id browser_type dates_active date"
 )
