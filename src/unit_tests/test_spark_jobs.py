@@ -56,6 +56,4 @@ def test_user_devices_cumulative_table(spark):
     expected_output_df = spark.createDataFrame(expected_output)
 
     actual_df = job_2(spark, positivelyamber.user_devices_cumulated)
-
     assert_df_equality = (actual_df, expected_output_df, ignore_nullable=true)
-    
