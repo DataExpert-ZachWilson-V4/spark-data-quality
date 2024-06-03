@@ -2,14 +2,15 @@ from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-def query_1(output_table_name: str) -> str:
+def query_1(output_table_name: str, current_year: int) -> str:
+    last_year = current_year - 1
     query = f"""
     WITH last_year_cte AS (
         SELECT *
         FROM 
             {output_table_name}
         WHERE 
-            current_year=1913 
+            current_year = {last_year}
     ),
     this_year_agg_cte AS (
         SELECT 
@@ -24,7 +25,7 @@ def query_1(output_table_name: str) -> str:
             END as quality_class,
             ty.year as year
         FROM actor_films AS ty
-        WHERE year = 1914
+        WHERE year = {current_year}
         GROUP BY ty.actor, ty.actor_id, ty.year
     )
     SELECT 
@@ -44,18 +45,19 @@ def query_1(output_table_name: str) -> str:
     """
     return query
 
-def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
-  output_df = spark_session.table(output_table_name)
+def job_1(spark_session: SparkSession, output_table_name: str, current_year: int) -> Optional[DataFrame]:
+  output_df = spark_session.table(output_table_name, current_year)
   output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_1(output_table_name))
 
 def main():
     output_table_name: str = "actors"
+    current_year: int = 1920
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
         .appName("job_1")
         .getOrCreate()
     )
-    output_df = job_1(spark_session, output_table_name)
+    output_df = job_1(spark_session, output_table_name, current_year)
     output_df.write.mode("overwrite").insertInto(output_table_name)
