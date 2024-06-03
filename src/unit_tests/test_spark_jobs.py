@@ -29,7 +29,7 @@ def test_job_1(spark_session) -> None:
     ]
 
     we_df: DataFrame = spark_session.createDataFrame(web_events)
-    we_df.createOrReplaceTempView("sample_web_events")
+    we_df.createOrReplaceTempView("mock_events")
 
     devices = [
         {"device_id": 532630305, "browser_type": "Other", "os_type": "Other", "device_type": "Other"},
@@ -37,7 +37,7 @@ def test_job_1(spark_session) -> None:
     ]
 
     d_df: DataFrame = spark_session.createDataFrame(devices)
-    d_df.createOrReplaceTempView("sample_devices")
+    d_df.createOrReplaceTempView("mock_devices")
 
     event_dt = to_dt('2023-01-14', is_date=True)
     uds = [
@@ -46,13 +46,13 @@ def test_job_1(spark_session) -> None:
     ]
     schema = "user_id: bigint, browser_type: string, dates_active: array<date>, date: date"
     eud_df: DataFrame = spark_session.createDataFrame(uds, schema)
-    eud_df.createOrReplaceTempView("sample_user_devices")
+    eud_df.createOrReplaceTempView("mock_user_devices")
 
     aud_df = job_1(
         spark_session,
-        "sample_web_events",
-        "sample_devices",
-        "sample_user_devices",
+        "mock_events",
+        "mock_devices",
+        "mock_user_devices",
         '2023-01-14'
     )
 
@@ -69,8 +69,8 @@ def test_job_2(spark_session: SparkSession) -> None:
         {"actor_id": "nm0516001", "actor": "Harold Lloyd", "films": [["tt0012642", "A Sailor-Made Man", 1921, 972, 6.9]], "quality_class": "average", "is_active": True, "current_year": 1921},
     ]
 
-    actor_films_df = spark_session.createDataFrame(actor_films)
-    actor_films_df.createOrReplaceTempView("mock_actor_films")
+    af_df = spark_session.createDataFrame(actor_films)
+    af_df.createOrReplaceTempView("mock_actor_films")
 
     schema = StructType([
         StructField("actor_id", StringType(), True),
@@ -80,15 +80,15 @@ def test_job_2(spark_session: SparkSession) -> None:
         StructField("is_active", BooleanType(), True),
         StructField("current_year", IntegerType(), True)
     ])
-    expected_actors_history_df: DataFrame = spark_session.createDataFrame(actors_history, schema)
+    eah_df: DataFrame = spark_session.createDataFrame(actors_history, schema)
 
-    actual_actors_history_df = job_2(spark_session, "mock_actor_films")
+    aah_df = job_2(spark_session, "mock_actor_films")
 
-    expected_set = set([convert_row_to_tuple(row) for row in expected_actors_history_df.collect()])
-    actual_set = set([convert_row_to_tuple(row) for row in actual_actors_history_df.collect()])
+    expected_set = set([convert_row_to_tuple(row) for row in eah_df.collect()])
+    actual_set = set([convert_row_to_tuple(row) for row in aah_df.collect()])
 
     assert expected_set == actual_set, \
-        f"Actor history mismatch. \nExpected: {expected_actors_history_df.collect()} \nActual: {actual_actors_history_df.collect()}"
+        f"Actor history mismatch. \nExpected: {eah_df.collect()} \nActual: {aah_df.collect()}"
 
 
 if __name__ == "__main__":
