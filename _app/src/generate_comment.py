@@ -128,14 +128,12 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
         )
         comment = response.choices[0].message.content
         return comment
-    except openai.error.InvalidRequestError as e:
+    except Exception as e:
         error_message = str(e)
         if 'maximum context length' in error_message:
             return f"Error: The submission is too long. Please remove unnecessary whitespace and comments from your code to reduce its size. Details: {error_message}"
         else:
             return f"The following error occurred while requesting a response from ChatGPT: {error_message}"
-    except Exception as e:
-        return f"An unexpected error occurred: {str(e)}"
 
 def get_response(system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
