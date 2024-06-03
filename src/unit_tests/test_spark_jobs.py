@@ -1,8 +1,8 @@
 import pytest
 from datetime import datetime
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, IntegerType, FloatType
-from typing import Any, Dict, List
+from pyspark.sql.types import StructType, StructField, StringType, ArrayType, BooleanType, IntegerType
+from typing import Any
 from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
 

@@ -2,7 +2,6 @@ from typing import Optional
 from datetime import datetime, timedelta
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-from pyspark.sql.utils import AnalysisException
 
 
 def query_1(
@@ -10,13 +9,10 @@ def query_1(
         devices_input_table_name: str,
         output_table_name: str,
         current_date: str) -> str:
-    try:
-        dt = datetime.strptime(current_date, "%Y-%m-%d")
-        previous_date = dt - timedelta(days=1)
-        previous_date_str = previous_date.strftime("%Y-%m-%d")
-    except ValueError as e:
-        print(f"Error parsing date: {e}")
-        return ""
+    dt = datetime.strptime(current_date, "%Y-%m-%d")
+    previous_date = dt - timedelta(days=1)
+    previous_date_str = previous_date.strftime("%Y-%m-%d")
+
 
     query = f"""
     WITH yesterday AS (
@@ -64,40 +60,29 @@ def job_1(
         output_table_name: str,
         current_date: str) -> Optional[DataFrame]:
 
-    try:
-        output_df = spark_session.table(output_table_name)
-        output_df.createOrReplaceTempView(output_table_name)
-    except AnalysisException as e:
-        print(f"Error accessing table {output_table_name}: {e}")
-        return None
+    output_df = spark_session.table(output_table_name)
+    output_df.createOrReplaceTempView(output_table_name)
 
-    try:
-        result_df = spark_session.sql(
-            query_1(
-                events_input_table_name,
-                devices_input_table_name,
-                output_table_name,
-                current_date
-            )
+    result_df = spark_session.sql(
+        query_1(
+            events_input_table_name,
+            devices_input_table_name,
+            output_table_name,
+            current_date
         )
-        return result_df
-    except (ValueError, TypeError) as e:
-        print(f"Error executing query: {e}")
-        return None
+    )
+    return result_df
 
 
 def main():
-    output_table_name: str = "jlcharbneau.user_devices_cumulated"
-    try:
-        spark_session: SparkSession = (
-            SparkSession.builder
-            .master("local")
-            .appName("job_1")
-            .getOrCreate()
-        )
-    except (RuntimeError, AnalysisException, ValueError) as e:
-        print(f"Error creating Spark session: {e}")
-        return
+    output_table_name: str = "user_devices_cumulated"
+
+    spark_session: SparkSession = (
+        SparkSession.builder
+        .master("local")
+        .appName("job_1")
+        .getOrCreate()
+    )
 
     output_df = job_1(
         spark_session,
@@ -108,10 +93,7 @@ def main():
     )
 
     if output_df is not None:
-        try:
-            output_df.write.mode("overwrite").insertInto(output_table_name)
-        except AnalysisException as e:
-            print(f"Error writing to table {output_table_name}: {e}")
+        output_df.write.mode("overwrite").insertInto(output_table_name)
     else:
         print("No DataFrame to write to the output table.")
 
