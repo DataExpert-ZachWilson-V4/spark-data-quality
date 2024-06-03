@@ -86,38 +86,22 @@ def get_prompts(assignment: str) -> dict:
             prompt_contents[prompt] = file.read()
     return prompt_contents
 
-
 def generate_system_prompt(prompts: dict):
     system_prompt = prompts['system_prompt.md']
-    
     system_prompt += "# Additional Information"
     system_prompt += f"\n\n{prompts['week_1_queries.md']}"
     system_prompt += f"\n\n{prompts['week_2_queries.md']}"
     system_prompt += f"\n\n{prompts['example_solution.md']}"
     system_prompt += "\n\n"
-    
     return system_prompt
 
-
-def generate_feedback_prompt(prompts: dict, submissions: dict) -> str:
-    user_prompt = prompts['user_prompt_1.md']
-    user_prompt += "\n\n"
-    user_prompt += "# Student's Solution\n"
-    user_prompt += "Please analyze the code below:\n"
+def generate_prompt(prompts: dict, submissions: dict, user_prompt_key: str, action: str) -> str:
+    user_prompt = prompts[user_prompt_key]
+    user_prompt += "\n\n# Student's Solution\n"
+    user_prompt += f"Please {action} the code below:\n"
     for file_name, submission in submissions.items():
         user_prompt += f"`{file_name}`:\n\n```\n{submission}\n```\n\n"
     return user_prompt
-
-
-def generate_grading_prompt(prompts: dict, submissions: dict) -> str:
-    user_prompt = prompts['user_prompt_2.md']
-    user_prompt += "\n\n"
-    user_prompt += "# Student's Solution\n"
-    user_prompt += "Please grade the code below:\n"
-    for file_name, submission in submissions.items():
-        user_prompt += f"`{file_name}`:\n\n```\n{submission}\n```\n\n"
-    return user_prompt
-
 
 def get_response(system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
@@ -129,9 +113,7 @@ def get_response(system_prompt: str, user_prompt: str) -> str:
         temperature=0,
     )
     comment = response.choices[0].message.content
-    # text = f"This is a LLM-generated comment: \n{comment if comment else 'No feedback generated.'}"
     return comment
-
 
 def post_github_comment(git_token, repo, pr_number, comment):
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
@@ -147,7 +129,6 @@ def post_github_comment(git_token, repo, pr_number, comment):
         raise Exception(f"Failed to create comment. Status code: {response.status_code} \n{response.text}")
     logger.info(f"✅ Added review comment at https://github.com/{repo}/pull/{pr_number}")
 
-
 def main():
     submissions = get_submissions(submission_dir)
     if not submissions:
@@ -158,20 +139,35 @@ def main():
     prompts = get_prompts(assignment)
     
     system_prompt = generate_system_prompt(prompts)
-
-    feedback_prompt = generate_feedback_prompt(prompts, submissions)
-    feedback_comment = get_response(system_prompt, feedback_prompt)
     
-    grading_prompt = generate_grading_prompt(prompts, submissions)
-    grading_comment = get_response(system_prompt, grading_prompt)
+    jobs_submissions = {file_name: submission for file_name, submission in submissions.items() if '/jobs/' in file_name}
+    tests_submissions = {file_name: submission for file_name, submission in submissions.items() if '/unit_tests/' in file_name}
+
+    feedback_comment = ''
+    grading_comment = ''
+    
+    if jobs_submissions:
+        jobs_feedback_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'analyze')
+        jobs_feedback = get_response(system_prompt, jobs_feedback_prompt)
+        feedback_comment += jobs_feedback
+    
+        jobs_grading_prompt = generate_prompt(prompts, jobs_submissions, 'user_prompt_jobs.md', 'grade')
+        jobs_grading = get_response(system_prompt, jobs_grading_prompt)
+        grading_comment += jobs_grading
+
+    if tests_submissions:
+        tests_feedback_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'analyze')
+        tests_feedback = get_response(system_prompt, tests_feedback_prompt)
+        feedback_comment += tests_feedback
+    
+        tests_grading_prompt = generate_prompt(prompts, tests_submissions, 'user_prompt_tests.md', 'grade')
+        tests_grading = get_response(system_prompt, tests_grading_prompt)
+        grading_comment += tests_grading
 
     final_comment = f"### Feedback:\n{feedback_comment}\n\n### Grade:\n{grading_comment}"
 
     if git_token and repo and pr_number:
         post_github_comment(git_token, repo, pr_number, final_comment)
-
-    # return final_comment
-
 
 if __name__ == "__main__":
     main()
