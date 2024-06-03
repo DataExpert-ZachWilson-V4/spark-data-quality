@@ -73,10 +73,7 @@ def job_1(
 ) -> Optional[DataFrame]:
     # Setup the input table as a view
     dataframe.createOrReplaceTempView(input_table_name)
-
     # Not setting up the output table as a view here because it's a Spark Query
-    # and insertion can be handled differently. But it does need to exist for this
-    # query to work.
     return spark_session.sql(
         query_1(
             input_table_name=input_table_name,
@@ -84,55 +81,3 @@ def job_1(
             last_year=last_year,
         )
     )
-
-
-def main():
-    input_table_name: str = "actor_films"
-    output_table_name: str = "actors"
-    spark_session: SparkSession = (
-        SparkSession.builder.master("local").appName("job_1").getOrCreate()
-    )
-
-    input_schema = StructType(
-        [
-            StructField("actor", StringType(), True),
-            StructField("actor_id", StringType(), True),
-            StructField("film", StringType(), True),
-            StructField("year", IntegerType(), True),
-            StructField("votes", IntegerType(), True),
-            StructField("rating", FloatType(), True),
-            StructField("film_id", StringType(), True),
-        ]
-    )
-
-    films_schema = StructType(
-        [
-            StructField("film", StringType(), True),
-            StructField("votes", LongType(), True),
-            StructField("rating", LongType(), True),
-            StructField("film_id", StringType(), True),
-            StructField("year", LongType(), True),
-        ]
-    )
-    output_schema = StructType(
-        [
-            StructField("actor", StringType(), False),
-            StructField("actor_id", StringType(), False),
-            StructField("films", ArrayType(films_schema), False),
-            StructField("quality_class", StringType(), True),
-            StructField("is_active", StringType(), True),
-            StructField("current_year", IntegerType(), True),
-        ]
-    )
-    output_df = spark_session.createDataFrame(data=[], schema=output_schema)
-    # output_df.createOrReplaceTempView(output_table_name)
-    input_df = spark_session.createDataFrame(data=[], schema=input_schema)
-    # input_df.createOrReplaceTempView(input_table_name)
-    output_df = job_1(
-        spark_session=spark_session,
-        dataframe=input_df,
-        output_table_name=output_table_name,
-        input_table_name=input_table_name,
-        last_year=1913,
-    )
-    # output_df.write.mode("overwrite").insertInto(output_table_name)
