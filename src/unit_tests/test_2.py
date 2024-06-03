@@ -11,16 +11,13 @@ from pyspark.sql.types import (
     ArrayType,
     BooleanType,
 )
-
 Actor = namedtuple(
     "Actor", "actor actor_id average_rating quality_class is_active current_year"
 )
-
 ActorSCD = namedtuple(
     "ActorSCD",
     "actor actor_id is_active average_rating quality_class start_date, end_date, current_year",
 )
-
 input_actors_data = [
     Actor(
         actor="Clancy Brown",
@@ -39,7 +36,6 @@ input_actors_data = [
         current_year=2012,
     ),
 ]
-
 expected_actorscd_output = [
     ActorSCD(
         actor="Clancy Brown",
@@ -62,7 +58,6 @@ expected_actorscd_output = [
         current_year=2012,
     ),
 ]
-
 actors_schema = StructType(
     [
         StructField("actor", StringType(), True),
@@ -73,7 +68,6 @@ actors_schema = StructType(
         StructField("current_year", IntegerType(), False),
     ]
 )
-
 actorscd_schema = StructType(
     [
         StructField("actor", StringType(), True),
@@ -86,11 +80,7 @@ actorscd_schema = StructType(
         StructField("current_year", IntegerType(), False),
     ]
 )
-
-
-# Define the schema for the films array
 def test_spark_queries_1(spark_session):
-
     input_actors_dataframe = spark_session.createDataFrame(
         input_actors_data, actors_schema
     )

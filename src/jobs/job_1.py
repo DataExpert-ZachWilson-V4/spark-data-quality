@@ -15,12 +15,10 @@ def query_1(input_table_name: str) -> str:
     WHERE rn = 1
     """
     return query
-
 def job_1(spark_session: SparkSession, in_dataframe: DataFrame) -> Optional[DataFrame]:
   input_table = 'fct_nba_game_details'
   in_dataframe.createOrReplaceTempView(input_table)
   return spark_session.sql(query_1(input_table))
-
 def main():
     output_table_name: str = "sagararora492.fct_nba_game_details_deduped"
     spark_session: SparkSession = (

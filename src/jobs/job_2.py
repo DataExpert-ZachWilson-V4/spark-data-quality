@@ -56,13 +56,11 @@ def query_2(input_table_name: str) -> str:
             streak_identifier -- Group by streak_identifier to maintain streak boundaries
     """
     return query
-
 def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
   input_table_name = "actors"
   input_df.createOrReplaceTempView(input_table_name)
   input_df = spark_session.sql(query_2(input_table_name))
   return input_df
-
 def main():
     output_table_name: str = "sagararora492.actors_history_scd"
     spark_session: SparkSession = (
