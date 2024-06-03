@@ -25,30 +25,8 @@ def dedup_date(spark_session):
     fct_nba_game_details_df.createOrReplaceTempView("fct_nba_game_details")
     expected_df = spark.createDataFrame(expected_nba_game_details_data, schema=fct_nba_game_details_dedup_schema)
 
-    actual_df = job_1.job_1(
-        spark, 
-        "fct_nba_game_details"
-    )
+    actual_df = job_1.job_1(spark,"fct_nba_game_details")
     assert_df_equality(actual_df, expected_df, ignore_row_order=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def test_inc_host_data(spark_session):
     host_cols = ["host", "host_activity_datelist", "date"]
@@ -56,50 +34,19 @@ def test_inc_host_data(spark_session):
     web_event_cols = ["host", "event_time"]
     WebEvents = namedtuple("WebEvents", web_event_cols)
 
-    host_schema = StructType([
-        StructField("host", StringType()),
-        StructField("host_activity_datelist", ArrayType(DateType())),
-        StructField("date", DateType())
-    ])
-
+    host_schema = StructType([StructField("host", StringType()), StructField("host_activity_datelist", ArrayType(DateType())), StructField("date", DateType())])
     actual_host_data = []
     actual_web_event_data = [
-            WebEvents(
-                host = "www.example.com",
-                event_time = "2023-01-01 21:29:03.519"
-            ),
-            WebEvents(
-            host = "www.example.com",
-            event_time = "2023-01-01 00:05:39.907"
-           ),
-            WebEvents(
-                host = "admin.zachwilson.io.tech",
-                event_time = "2023-01-01 00:01:39.907"
-            ),
-            WebEvents(
-                host = "admin.zachwilson.testing.tech",
-                event_time = "2023-01-01 00:08:13.852"
-            ),
+    WebEvents(host="www.example.com", event_time="2023-01-01 21:29:03.519"),
+    WebEvents(host="www.example.com", event_time="2023-01-01 00:05:39.907"),
+    WebEvents(host="admin.zachwilson.io.tech", event_time="2023-01-01 00:01:39.907"),
+    WebEvents(host="admin.zachwilson.testing.tech", event_time="2023-01-01 00:08:13.852")
     ]
-
     expected_data = [
-        Hosts(
-            host = "www.example.com",
-            host_activity_datelist = [datetime.strptime("2023-01-01", "%Y-%m-%d")],
-            date = datetime.strptime("2023-01-01", "%Y-%m-%d")
-        ),
-        Hosts(
-            host = "admin.zachwilson.io.tech",
-            host_activity_datelist = [datetime.strptime("2023-01-01", "%Y-%m-%d")],
-            date = datetime.strptime("2023-01-01", "%Y-%m-%d")
-        ),
-        Hosts(
-            host = "admin.zachwilson.testing.tech",
-            host_activity_datelist = [datetime.strptime("2023-01-01", "%Y-%m-%d")],
-            date = datetime.strptime("2023-01-01", "%Y-%m-%d")
-        )
+    Hosts(host="www.example.com", host_activity_datelist=[datetime.strptime("2023-01-01", "%Y-%m-%d")], date=datetime.strptime("2023-01-01", "%Y-%m-%d")),
+    Hosts(host="admin.zachwilson.io.tech", host_activity_datelist=[datetime.strptime("2023-01-01", "%Y-%m-%d")], date=datetime.strptime("2023-01-01", "%Y-%m-%d")),
+    Hosts(host="admin.zachwilson.testing.tech", host_activity_datelist=[datetime.strptime("2023-01-01", "%Y-%m-%d")], date=datetime.strptime("2023-01-01", "%Y-%m-%d"))
     ]
-
     spark = SparkSession.builder.master("local").appName("chispa_test").getOrCreate()
     host_df = spark.createDataFrame(actual_host_data, schema=host_schema)
     web_events_df = spark.createDataFrame(actual_web_event_data)
@@ -108,11 +55,5 @@ def test_inc_host_data(spark_session):
     host_df.createOrReplaceTempView("host_cumulated")
     web_events_df.createOrReplaceTempView("web_events")
 
-    actual_df = job_2.job_2(
-        spark, 
-        "host_cumulated",
-        "web_events",
-        "2023-01-01"
-    )
-
+    actual_df = job_2.job_2(spark,"host_cumulated","web_events","2023-01-01")
     assert_df_equality(actual_df, expected_df, ignore_row_order=True)
