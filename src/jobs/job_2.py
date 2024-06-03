@@ -4,15 +4,6 @@ import pyspark.sql.functions as F
 
 
 def query_2(output_table_name: str) -> str:
-    """
-    Generates the SQL query string for PySpark job.
-
-    Args:
-        output_table_name (str): Name of the output table.
-
-    Returns:
-        str: SQL query string.
-    """
     query = f"""
     WITH lagged AS (
         SELECT *,
@@ -51,16 +42,6 @@ def query_2(output_table_name: str) -> str:
 
 
 def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
-    """
-    Executes data transformations and aggregations.
-
-    Args:
-        spark_session (SparkSession): Spark session instance.
-        output_table_name (str): Name of the output table.
-
-    Returns:
-        Optional[DataFrame]: Resulting DataFrame after transformations.
-    """
     try:
         # Load dataset
         df = spark_session.table(output_table_name)
@@ -122,9 +103,6 @@ def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
 
 
 def main():
-    """
-    Main function to set up Spark session and execute the job.
-    """
     try:
         output_table_name: str = "actors_history"
 

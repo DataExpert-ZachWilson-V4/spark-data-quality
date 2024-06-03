@@ -1,12 +1,3 @@
-"""
-This module contains unit tests for Spark jobs using PyTest. It includes the following functionalities:
-1. Fixture for creating a Spark session.
-2. Utility functions for date conversion, row conversion, and JSON data loading.
-3. Test cases for Spark jobs 'job_1' and 'job_2'.
-
-The tests are designed to validate the correctness of the Spark jobs by comparing the actual output DataFrames with expected results.
-"""
-import os
 import pytest
 from datetime import datetime
 from pyspark.sql import SparkSession, DataFrame
@@ -18,12 +9,6 @@ from src.jobs.job_2 import job_2
 
 @pytest.fixture(scope="session")
 def spark_session():
-    """
-    Fixture for creating a Spark session with local master and app name 'pytest'.
-
-    Returns:
-        SparkSession: Spark session object.
-    """
     return SparkSession.builder \
         .master("local") \
         .appName("pytest") \
@@ -31,19 +16,6 @@ def spark_session():
 
 
 def to_dt(date_str: str, is_date: bool = False) -> datetime:
-    """
-    Converts a date string to a datetime or date object.
-
-    Args:
-        date_str (str): Date string to convert.
-        is_date (bool): Flag to determine if the output should be a date object.
-
-    Returns:
-        datetime: Converted datetime or date object.
-
-    Raises:
-        ValueError: If the date_str is not in the expected format.
-    """
     try:
         if is_date:
             return datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -61,15 +33,6 @@ def convert_row_to_tuple(row: Any) -> tuple:
 
 
 def test_job_1(spark_session) -> None:
-    """
-    Unit test for job_1 function. Creates mock web events data, runs the job, and validates the output.
-
-    Args:
-        spark_session (SparkSession): Spark session fixture.
-
-    Raises:
-        AssertionError: If the actual output does not match the expected output.
-    """
     web_events = [
         {"user_id": 1919317753, "device_id": 532630305, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:38"},
         {"user_id": 1919317753, "device_id": -189493684, "host": "www.zachwilson.tech", "event_time": "2023-01-14 14:44:39"},
@@ -113,16 +76,6 @@ def test_job_1(spark_session) -> None:
 
 
 def test_job_2(spark_session: SparkSession) -> None:
-    """
-    Unit test for job_2 function. Creates mock actor films data, runs the job, and validates the output.
-
-    Args:
-        spark_session (SparkSession): Spark session fixture.
-
-    Raises:
-        AssertionError: If the actual output does not match the expected output.
-    """
-
     actor_films = [
         {"actor": "Milton Berle", "actor_id": "nm0000926", "film": "Little Lord Fauntleroy", "year": 1921, "votes": 283, "rating": 6.7, "film_id": "tt0012397"},
         {"actor": "Harold Lloyd", "actor_id": "nm0516001", "film": "A Sailor-Made Man", "year": 1921, "votes": 972, "rating": 6.9, "film_id": "tt0012642"},
