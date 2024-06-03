@@ -25,35 +25,7 @@ def query_2(input_table_name: str) -> str:
         FROM {input_table_name}
     )
     -- SELECT only the first row of each partition
-    SELECT  game_id,
-            team_id,
-            team_abbreviation,
-            team_city,
-            player_id,
-            player_name,
-            nickname,
-            start_position,
-            comment,
-            min,
-            fgm,
-            fga,
-            fg_pct,
-            fg3m,
-            fg3a,
-            fg3_pct,
-            ftm,
-            fta,
-            ft_pct,
-            oreb,
-            dreb,
-            reb,
-            ast,
-            stl,
-            blk,
-            to,
-            pf,
-            pts,
-            plus_minus
+    SELECT game_id, team_id, team_abbreviation, team_city, player_id, player_name, nickname, start_position, comment, min, fgm, fga, fg_pct, fg3m, fg3a, fg3_pct, ftm, fta, ft_pct, oreb, dreb, reb, ast, stl, blk, to, pf, pts, plus_minus
     FROM duplicate_data
     WHERE rn = 1
     """
