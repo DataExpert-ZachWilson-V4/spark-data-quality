@@ -16,6 +16,7 @@ def test_job_1(spark: SparkSession):
         "actor_films", "actor actor_id film film_id year votes rating"
     )
 
+    # test for 2015 data
     input_actor_films_data = [
         actor_films(
             actor="Brad Pitt",
@@ -55,6 +56,7 @@ def test_job_1(spark: SparkSession):
         ),
     ]
 
+    # table contains initially 2014 data
     input_actors_data = [
         actors(
             actor="Brad Pitt",
@@ -137,6 +139,7 @@ def test_job_2(spark: SparkSession):
         "nba_game_details", "game_id team_id player_id"
     )
 
+    # test only with columns that meets the uniqueness condition
     input_data = [
         nba_game_details(game_id=1, team_id=1, player_id=1),
         nba_game_details(game_id=1, team_id=1, player_id=1),
