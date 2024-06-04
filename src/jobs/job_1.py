@@ -19,7 +19,7 @@ def query_1(output_table_name: str, current_year: int) -> str:
             SELECT
                 actor,
                 actor_id,
-                ARRAY_AGG(STRUCT(film, votes, rating, film_id)) AS films, -- Generating an array of all films attributes
+                ARRAY_AGG(STRUCT(film, votes, rating, film_id)) AS films, -- Array of films attributes
                 CASE -- Categorical information for quality class
                     WHEN AVG(rating) > 8 THEN 'star'
                     WHEN AVG(rating) > 7 THEN 'good'
@@ -42,11 +42,8 @@ def query_1(output_table_name: str, current_year: int) -> str:
             COALESCE(ly.actor, cy.actor) AS actor,
             COALESCE(ly.actor_id, cy.actor_id) AS actor_id,
             CASE
-                -- Last years' films IS NULL, choose current year films only
                 WHEN ly.films IS NULL THEN cy.films
-                -- Current years' films IS NOT NULL, load the films in reverse chronological order
                 WHEN cy.films IS NOT NULL THEN cy.films || ly.films
-                -- Current years' films IS NULL
                 ELSE ly.films
             END AS films,
             COALESCE(ly.quality_class, cy.quality_class) AS quality_class,
