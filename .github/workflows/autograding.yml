@@ -13,9 +13,69 @@ permissions:
   contents: read
 
 jobs:
+  get_upstream_repo:
+    name: 'Get upstream repository'
+    runs-on: ubuntu-latest
+    outputs:
+      upstream_repo: ${{ steps.get_repo_name.outputs.upstream_repo }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Get upstream repository name
+        id: get_repo_name
+        run: |
+          echo "upstream_repo=$(basename "${{ github.event.repository.full_name }}")" >> $GITHUB_OUTPUT
+
+  validate_pr_env:
+    name: 'Check PR environment'
+    runs-on: ubuntu-latest
+    needs: get_upstream_repo
+    outputs:
+      correct_env: ${{ steps.compare_repo_envs.outputs.correct_env }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Get head repository name
+        id: get_repo_name
+        run: |
+          echo "head_repo=$(basename "${{ github.event.pull_request.head.repo.full_name }}")" >> $GITHUB_OUTPUT
+      - name: Compare upstream and head repositories
+        id: compare_repo_envs
+        env:
+          UPSTREAM_REPO: ${{ needs.get_upstream_repo.outputs.upstream_repo }}
+          HEAD_REPO: ${{ steps.get_repo_name.outputs.head_repo }}
+        run: |
+          if [ "${{ env.HEAD_REPO }}" != "${{ env.UPSTREAM_REPO }}" ]; then
+            echo "correct_env=true" >> $GITHUB_OUTPUT
+          else
+            echo "----------------------------------------------------------------------------------"
+            echo "⚠️ Workflow Error ⚠️"
+            echo ""
+            echo "You opened this pull request (PR) in your own copy (fork) of the project repository."
+            echo "Forked repos do not have access to the secrets required for these actions."
+            echo "To run the workflow, you need to open the PR in the main (upstream) repository."
+            echo ""
+            echo "Steps to fix:"
+            echo "1. Go to the upstream repository your fork was created from on GitHub."
+            echo "2. Click on 'Pull requests' and then 'New pull request'."
+            echo "3. Select your forked repo and the branch you worked on in the 'compare' section."
+            echo "4. Submit the pull request."
+            echo ""
+            echo "----------------------------------------------------------------------------------"
+            exit 1
+          fi
+      
   check_files:
     name: 'Check files changed'
     runs-on: ubuntu-latest
+    needs: validate_pr_env
+    if: needs.validate_pr_env.outputs.correct_env == 'true'
     outputs:
       all_changed_submission_files: ${{ steps.filtered-changed-files.outputs.all_changed_submission_files }}
       any_submission_changes: ${{ steps.filtered-changed-files.outputs.any_submission_changes }}
@@ -27,7 +87,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
-
       - name: Get all changed files
         id: tj-actions-changed-files
         uses: tj-actions/changed-files@v44
