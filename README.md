@@ -1,3 +1,5 @@
+
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/l3elQelD)
 # Spark Data Quality
 
 Your assignment is to convert **two** of the SQL queries you wrote in Weeks 1-2 to SparkSQL *and* write unit integration tests on those queries.
@@ -33,6 +35,32 @@ Your assignment is to convert **two** of the SQL queries you wrote in Weeks 1-2 
 6. Check the Github workflow for LLM-generated feedback for revision. You can update your PR as many times as you'd like before the submission deadline.
 
 Grades are determined on a pass or fail basis. This is only used for certification purposes.
+
+## Prerequisites : 
+### 1. Check for Java Installation: ###
+
+Before setting up a virtual environment, ensure that Java is installed on your system.
+
+- Check Java version:
+
+Type the following command and press Enter:
+```cmd
+java -version
+```
+- Verify output: If Java is installed, you will see the installed Java version.
+
+    > :warning:  If not, you will get an error message indicating that Java is not recognized.
+
+### 2. Download and Install Java (if not installed) ###
+If Java is not installed, follow the instructions below to install it.
+
+**Download Java**
+1. Go to the official Java website: Visit [Oracle Java Downloads](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html) to download the latest version of Java SE Development Kit (JDK).
+2. Select the appropriate JDK version: Choose the JDK version that matches your operating system (Windows, macOS, or Linux).
+
+**Install Java**
+
+Follow the installation steps based on your operating system as described in the previous instructions.
 
 ## Getting started
 
