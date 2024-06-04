@@ -179,73 +179,11 @@ def test_job2(spark_session) -> None:
             -11,
         ),
     ]
+    nba_game_details_deduped = nba_game_details.copy()
+
+    # Now duplicate
     nba_game_details.extend(nba_game_details)
 
-    # Get the deduped NBA Game Details
-    nba_game_details_deduped = [
-        NBAGameDetails(
-            "21000424",
-            "1610612755",
-            "PHI",
-            "Philadelphia",
-            "201150",
-            "Spencer Hawes",
-            None,
-            "C",
-            None,
-            "19:43",
-            3,
-            8,
-            0.375,
-            0,
-            0,
-            0.0,
-            0,
-            0,
-            0.0,
-            3,
-            4,
-            7,
-            1,
-            0,
-            0,
-            4,
-            2,
-            6,
-            -7,
-        ),
-        NBAGameDetails(
-            "21000555",
-            "1610612755",
-            "PHI",
-            "Philadelphia",
-            "201150",
-            "Spencer Hawes",
-            None,
-            "C",
-            None,
-            "4:56",
-            0,
-            2,
-            0.0,
-            0,
-            0,
-            0.0,
-            0,
-            0,
-            0.0,
-            0,
-            2,
-            2,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            -11,
-        ),
-    ]
     # Setup input and output schemas for the NBA Game Details
     schema = StructType(
         [
