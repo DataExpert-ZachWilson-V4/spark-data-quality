@@ -68,7 +68,7 @@ def test_job_2(spark_session):
 
     # expected output based on our input
     expected_output = [
-         hosts_cumulated("admin.zachwilson.tech", [date(2023, 1, 7)], date(2023, 1, 7)),
+        hosts_cumulated("admin.zachwilson.tech", [date(2023, 1, 7)], date(2023, 1, 7)),
         hosts_cumulated("www.zachwilson.tech", [date(2023, 1, 7)], date(2023, 1, 7)),
         hosts_cumulated("www.eczachly.com", [date(2023, 1, 7)], date(2023, 1, 7))
     ]
@@ -86,7 +86,7 @@ def test_job_2(spark_session):
     empty_output_df.createOrReplaceTempView("hosts_cumulated")
 
     expected_output_df = spark_session.createDataFrame(expected_output,schema)
-    expected_output_df.show()
+
     # running the job
     actual_df = job_2(spark_session,"web_event", "hosts_cumulated")
 
