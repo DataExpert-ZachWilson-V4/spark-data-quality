@@ -14,7 +14,7 @@ def query_1(output_table_name: str) -> str:
         FROM
             mposada.actors
         WHERE
-            current_year = 1913
+            current_year = 2023
     ),
     this_year AS (
         SELECT
@@ -26,7 +26,7 @@ def query_1(output_table_name: str) -> str:
         FROM
             bootcamp.actor_films
         WHERE
-            year = 1914  -- this is the first year we have data for
+            year = 2024  -- this is the first year we have data for
         GROUP BY
             actor, actor_id, year
     )
@@ -64,7 +64,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_1(output_table_name))
 
 def main():
-    output_table_name: str = "mposada.actors"
+    output_table_name: str = "actors"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
@@ -73,3 +73,5 @@ def main():
     )
     output_df = job_1(spark_session, output_table_name)
     output_df.write.mode("overwrite").insertInto(output_table_name)
+
+    
