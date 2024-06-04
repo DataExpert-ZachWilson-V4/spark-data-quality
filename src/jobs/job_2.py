@@ -37,7 +37,7 @@ def query_2(output_table_name: str) -> str:
             yesterday AS y
         FULL OUTER JOIN today AS t ON y.host = t.host
     """
-    return querys
+    return query
 def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)

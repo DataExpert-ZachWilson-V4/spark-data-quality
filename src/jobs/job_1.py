@@ -1,9 +1,7 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-
 def query_1(output_table_name: str) -> str:
-    # This query populates actors table using actor_films table
     query = f"""
         WITH last_year AS (
             SELECT * FROM {output_table_name}
@@ -53,7 +51,6 @@ def query_1(output_table_name: str) -> str:
             ON ly.actor_id = ty.actor_id
     """
     return query
-
 def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)

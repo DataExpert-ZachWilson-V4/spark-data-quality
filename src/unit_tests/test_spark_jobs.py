@@ -24,7 +24,6 @@ def test_job1(spark_session):
         StructField("is_active", BooleanType(), False),
         StructField("current_year", IntegerType(), True)
     ])
-    #create yesterdays data for actors table
     yesterday_actors_data = [
         Row(
             actor = 'Actor A',
@@ -52,7 +51,6 @@ def test_job1(spark_session):
     ]
     yesterday_df = spark_session.createDataFrame(yesterday_actors_data, actors_schema)
     yesterday_df.createOrReplaceTempView(output_table_name)
-    # Define schema for actor_films DataFrame
     actor_films_schema = StructType([
         StructField("actor", StringType(), True),
         StructField("actor_id", StringType(), True),
@@ -62,7 +60,6 @@ def test_job1(spark_session):
         StructField("rating", DoubleType(), True),
         StructField("film_id", StringType(), True),
     ])
-    # Input data for testing
     actor_films_data = [
         Row(
             actor='Actor A',
@@ -85,7 +82,6 @@ def test_job1(spark_session):
     ]
     actor_films_df = spark_session.createDataFrame(actor_films_data, actor_films_schema)
     actor_films_df.createOrReplaceTempView('actor_films')
-    # Create DataFrame for expected data
     expected_data = [
         Row(
             actor = 'Actor A',
@@ -139,13 +135,11 @@ def test_job1(spark_session):
     assert_df_equality(actual_df, expected_df)
 def test_job2(spark_session):
     output_table_name: str = "hosts_cumulated"
-    # create schema for hosts_cumulated table so that datatypes are correct
     hosts_cumulated_schema = StructType([
         StructField("host", StringType(), True),
         StructField("host_activity_datelist", ArrayType(DateType()), True),
         StructField("date", DateType(), True)
     ])
-    # insert yesterdays hosts_cumulated data
     yesterday_hosts_cumulated_data = [
         Row(
             host = 'host1.com',
@@ -155,9 +149,7 @@ def test_job2(spark_session):
     ]
     yesterday_df = spark_session.createDataFrame(yesterday_hosts_cumulated_data,hosts_cumulated_schema)
     yesterday_df.createOrReplaceTempView(output_table_name)
-    # Get the UTC timezone
     utc_timezone = pytz.utc
-    # create input web_events data schema for proper data types
     web_events_schema = StructType([
         StructField("user_id", IntegerType(), True),
         StructField("device_id", IntegerType(), False),
@@ -166,7 +158,6 @@ def test_job2(spark_session):
         StructField("url", StringType(), False),
         StructField("event_time", TimestampType(), False)
     ])
-    # create web events data for today
     web_events_data = [
         Row(
             user_id = 123,
@@ -187,7 +178,6 @@ def test_job2(spark_session):
     ]
     web_events_df = spark_session.createDataFrame(web_events_data,web_events_schema)
     web_events_df.createOrReplaceTempView('web_events')
-    # create expected output data
     expected_data = [
         Row(
             host = 'abcd.com',
