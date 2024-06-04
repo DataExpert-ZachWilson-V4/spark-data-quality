@@ -114,43 +114,13 @@
         ]
     
         input_df = spark_session.createDataFrame(input_data)
-    
-        expected_schema = StructType(
-            [
-                StructField("game_id", StringType(), False),
-                StructField("team_id", StringType(), False),
-                StructField("team_abbreviation", StringType(), True),
-                StructField("team_city", StringType(), False),
-                StructField("player_id", StringType(), False),
-                StructField("player_name", StringType(), False),
-                StructField("start_position", StringType(), True),
-                StructField("dim_did_not_dress", BooleanType(), True),
-                StructField("dim_not_with_team", BooleanType(), True),
-                StructField("min", StringType(), True), 
-                StructField("fgm", LongType(), True),
-                StructField("fga", LongType(), True),
-                StructField("fg3m", LongType(), True),
-                StructField("fg3a", LongType(), True),
-                StructField("ftm", LongType(), True),
-                StructField("fta", LongType(), True),
-                StructField("oreb", LongType(), True),
-                StructField("dreb", LongType(), True),
-                StructField("reb", LongType(), True),
-                StructField("ast", LongType(), True),
-                StructField("stl", LongType(), True),
-                StructField("blk", LongType(), True),
-                StructField("to", LongType(), True),
-                StructField("pf", LongType(), True),
-                StructField("pts", LongType(), True),
-                StructField("plus_minus", LongType(), True),
-            ]
-        )
+ 
         expected_data = [
             OutputDetails("10300001","1610612742","DAL","Dallas",	696	,"Travis Best"	,None,	None,	"5",	4,	7,	0,	0,	2,	4,	0,	1,	1,	5,	0,	0,	3,	6,	10,	None),
             OutputDetails("11300047","1610612755","PHI","Philadelphia",201150,"Spencer Hawes",None,	None,	"17",	1,	7,	0,	2,	4,	4,	1,	4,	5,	2,	0,	0,	0,	3,	6,	None)
         ]
     
-        expected_df = spark_session.createDataFrame(expected_data, expected_schema)
+        expected_df = spark_session.createDataFrame(expected_data)
     
         result_df = job_2(spark_session,input_table_name, input_df)
     
