@@ -7,7 +7,7 @@ def query_2(output_table_name: str) -> str:
         f"""
             with
                 yesterday as (
-                    select * from {{output_table_name}} where date = DATE('2024-05-19')
+                    select * from {output_table_name} where date = DATE('2024-05-19')
                 ),
                 today as (
                     select

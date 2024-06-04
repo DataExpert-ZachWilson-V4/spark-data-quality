@@ -3,7 +3,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
 
-BOOTCAMP_TABLE_NAME = "bootcamp.nba_game_details"
 def query_1(output_table_name: str) -> str:
     query = \
         f"""
@@ -26,7 +25,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
 
 
 def main():
-    output_table_name: str = BOOTCAMP_TABLE_NAME
+    output_table_name: str = "bootcamp.nba_game_details"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")

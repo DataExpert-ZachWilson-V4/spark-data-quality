@@ -27,27 +27,27 @@ def test_game_dedup(spark_session):
         game_detail(
             game_id=11080016,
             team_id=1610787738,
-            team_abbreviation='NYK',
-            team_city='New York',
+            team_abbreviation="NYK",
+            team_city="New York",
             player_id=201186,
-            player_name='John Doe',
-            nickname='JD',
-            start_position='Forward',
-            comment='Great game!',
+            player_name="John Doe",
+            nickname="JD",
+            start_position="Forward",
+            comment="Great game!",
             min="35:20",
             fgm=1.0,
             fga=20.0,
             fg_pct=50.0
         ),
         game_detail(
-            11080016, 1610787738, 'NYK', 'New York', 201186, 'John Doe',
-            'JD', 'Forward', 'Great game!', "35:20", 1.0, 20.0, 50.0
+            11080016, 1610787738, "NYK", "New York", 201186, "John Doe",
+            "JD", "Forward", "Great game!", "35:20", 1.0, 20.0, 50.0
         )
     ]
     expected_output = [
         game_detail(
-            11080016, 1610787738, 'NYK', 'New York', 201186, 'John Doe',
-            'JD', 'Forward', 'Great game!', "35:20", 1.0, 20.0, 50.0
+            11080016, 1610787738, "NYK", "New York", 201186, "John Doe",
+            "JD", "Forward", "Great game!", "35:20", 1.0, 20.0, 50.0
         )
     ]
 
