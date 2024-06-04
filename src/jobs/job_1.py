@@ -19,7 +19,7 @@ def query_1(output_table_name: str, current_year: int) -> str:
             SELECT
                 actor,
                 actor_id,
-                ARRAY_AGG(ROW(film, votes, rating, film_id)) AS films, -- Generating an array of all films attributes
+                ARRAY_AGG(STRUCT(film, votes, rating, film_id)) AS films, -- Generating an array of all films attributes
                 CASE -- Categorical information for quality class
                     WHEN AVG(rating) > 8 THEN 'star'
                     WHEN AVG(rating) > 7 THEN 'good'

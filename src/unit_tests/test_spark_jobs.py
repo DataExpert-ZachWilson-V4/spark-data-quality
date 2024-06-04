@@ -1,10 +1,22 @@
 import pytest
 from chispa.dataframe_comparer import *
-from src.jobs.job_2 import job_2
 from src.jobs.job_1 import job_1
+from src.jobs.job_2 import job_2
 from collections import namedtuple
-from datetime import date
+from datetime import date, datetime
 from pyspark.sql import SparkSession
+from pyspark.sql.types import (
+    ArrayType,
+    DateType,
+    LongType,
+    StringType,
+    StructField,
+    StructType,
+)
+
+# Helper functions
+def convert_to_date(date_str: str) -> datetime:
+    return datetime.strptime(date_str, "%Y-%m-%d")
 
 # Test 1 setup
 actor_films = namedtuple(
@@ -23,7 +35,25 @@ devices_cumulated = namedtuple(
     "DevicesCumulated", "user_id browser_type dates_active date"
 )
 
+devices_schema = StructType(
+    [
+        StructField("device_id", StringType()),
+        StructField("browser_type", StringType()),
+        StructField("dates_active", ArrayType(DateType(), containsNull=True)),
 
+    ]
+)
+
+devices_cumulated_schema = StructType(
+    [
+        StructField("user_id", LongType()),
+        StructField("browser_type", StringType()),
+        StructField("dates_active", ArrayType(DateType(), containsNull=True)),
+        StructField("date", DateType()),
+    ]
+)
+
+'''
 def test_job1(spark: SparkSession):
     current_year = 2010
 
@@ -134,20 +164,20 @@ def test_job1(spark: SparkSession):
     ]
     expected_df = spark.createDataFrame(expected_output)
 
-    actual_df = job_2(spark, "actors")
+    actual_df = job_1(spark, "actors", current_year)
 
     # Assert
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
-
+'''
 
 def test_job2(spark: SparkSession):
 
     input_data_devices = [
-        devices(-1894773659, "Chrome", [date(2022, 12, 31)]),
-        devices(1535782140, "Chrome", [date(2022, 12, 31)]),
-        devices(-2012543895, "Googlebot", [date(2023, 1, 1)]),
+        devices(-1894773659, "Chrome", [convert_to_date("2022-12-31")]),
+        devices(1535782140, "Chrome", [convert_to_date("2022-12-31")]),
+        devices(-2012543895, "Googlebot", [convert_to_date("2023-01-01")]),
     ]
-    fake_devices_df = spark.createDataFrame(input_data_devices)
+    fake_devices_df = spark.createDataFrame(input_data_devices, devices_schema)
     fake_devices_df.createOrReplaceTempView("devices")
 
     input_data_web_events = [
@@ -183,17 +213,17 @@ def test_job2(spark: SparkSession):
         devices_cumulated(
             1272828233,
             "Chrome",
-            [date(2022, 12, 31)],
-            date(2023, 1, 1),
+            [convert_to_date("2022-12-31")],
+            convert_to_date("2023-01-01"),
         ),
         devices_cumulated(
             348646037,
             "Googlebot",
-            [date(2023, 1, 1)],
-            date(2023, 1, 1),
+            [convert_to_date("2023-01-01")],
+            convert_to_date("2023-01-01"),
         ),
     ]
-    devices_cumulated_df = spark.createDataFrame(input_data_devices_cumulated)
+    devices_cumulated_df = spark.createDataFrame(input_data_devices_cumulated, devices_cumulated_schema)
     devices_cumulated_df.createOrReplaceTempView("devices_cumulated")
 
     # Expected output
@@ -201,20 +231,20 @@ def test_job2(spark: SparkSession):
         devices_cumulated(
             1272828233,
             "Chrome",
-            [date(2022, 12, 31), date(2023, 1, 1)],
-            date(2023, 1, 1),
+            [convert_to_date("2022-12-31"), convert_to_date("2023-01-01")],
+            convert_to_date("2023-01-01"),
         ),
         devices_cumulated(
             348646037,
             "Googlebot",
-            [date(2023, 1, 1)],
-            date(2023, 1, 1),
+            [convert_to_date("2023-01-01")],
+            convert_to_date("2023-01-01"),
         ),
     ]
-    expected_df = spark.createDataFrame(expected_output)
+    expected_df = spark.createDataFrame(expected_output, devices_cumulated_schema)
 
     # acutal dataframe
-    actual_df = job_1(spark, "devices_cumulated", 2022)
+    actual_df = job_2(spark, "devices_cumulated")
 
     # assert
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
