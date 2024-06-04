@@ -9,7 +9,7 @@ def query_2(output_table_name: str) -> str:
 WITH
   old_data AS (
   SELECT * FROM {output_table_name}
-  WHERE DATE = DATE('2022-10-26')
+  WHERE DATE = DATE('2021-01-17')
   ),
 
    <CTE to hold current day's load>
@@ -18,7 +18,7 @@ WITH
     SELECT web.user_id as user_id,device.browser_type as browser_type,
    CAST(date_trunc('day', web.event_time) AS DATE) AS event_date
     FROM bootcamp.web_events web LEFT JOIN bootcamp.devices device ON web.device_id = device.device_id
-    WHERE date_trunc('day', web.event_time) = DATE('2022-10-27') -- 2022-10-27 as current day
+    WHERE date_trunc('day', web.event_time) = DATE('2021-01-18') -- 2021-01-18 as current day
     GROUP BY user_id,browser_type,CAST(date_trunc('day', event_time) AS DATE)
    )
    
@@ -30,7 +30,7 @@ SELECT
   CASE WHEN od.dates_active IS NOT NULL THEN ARRAY[cd.event_date] || od.dates_active ELSE ARRAY[cd.event_date]
   END AS dates_active,
 <setting current day parameter as DATE Column >
-  DATE('2022-10-27') AS DATE
+  DATE('2021-01-18') AS DATE
 FROM old_data od FULL OUTER JOIN current_day cd 
   ON od.user_id = cd.user_id 
 
