@@ -1,5 +1,4 @@
 import pytest
-from pyspark.sql import SparkSession
 from pyspark.sql import Row
 from src.jobs.job_1 import job_1
 from src.jobs.job_2 import job_2
