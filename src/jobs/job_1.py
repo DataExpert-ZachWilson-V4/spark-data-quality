@@ -17,8 +17,7 @@ def query_1(output_table_name: str) -> str:
     SELECT
       actor,
       actor_id,
-      ARRAY_AGG(
-        ROW(
+      COLLECT_LIST(ARRAY(
           film,
           votes,
           rating,
