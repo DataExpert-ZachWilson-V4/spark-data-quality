@@ -2,48 +2,44 @@ from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
-def query_2(output_table_name: str) -> str:
-    query = f"""
-    WITH yesterday AS (
-        SELECT *
-        FROM {output_table_name}
-        WHERE date = DATE('2022-12-31')
-    ),
-    today AS (
-        SELECT user_id,
-               browser_type,
-               CAST(date_trunc('day', event_time) AS DATE) AS event_date,
-               COUNT(1)
-        FROM bootcamp.web_events we
-        JOIN bootcamp.devices d ON d.device_id = we.device_id
-        WHERE date_trunc('day', event_time) = DATE('2023-01-01')
-        GROUP BY user_id, browser_type, CAST(date_trunc('day', event_time) AS DATE)
-    )
-    SELECT COALESCE(y.user_id, t.user_id) AS user_id,
-           COALESCE(y.browser_type, t.browser_type) AS browser_type,
-           CASE
-               WHEN y.dates_active IS NOT NULL THEN ARRAY[t.event_date] || y.dates_active 
-               ELSE ARRAY[t.event_date]
-           END AS dates_active,
-           DATE('2023-01-01') AS date
-    FROM yesterday y
-    FULL OUTER JOIN today t ON y.user_id = t.user_id AND y.browser_type = t.browser_type
+#
+def query_2(input_table_name: str) -> str:
+    return f"""
+        WITH lagged AS (
+        SELECT player_name,
+          CASE WHEN is_active THEN 1 ELSE 0 END AS is_active,
+          current_season,
+          CASE WHEN LAG(is_active,1) OVER (PARTITION BY player_name ORDER BY current_season) THEN 1 ELSE 0 END AS is_active_last_season
+        FROM {input_table_name}
+        WHERE current_season <= 2005
+        ), streaked AS (
+          SELECT *,
+            SUM(CASE WHEN is_active <> is_active_last_season THEN 1 ELSE 0 END) OVER (PARTITION BY player_name ORDER BY current_season) AS streak_identifier
+          FROM lagged
+        )
+        SELECT player_name,
+          MAX(is_active) = 1 AS is_active,
+          MIN(current_season) AS start_season,
+          MAX(current_season) AS end_season
+        FROM streaked
+        GROUP BY player_name,
+          streak_identifier
     """
-    return query
+    return  query
 
-def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
-  output_df = spark_session.table(output_table_name)
-  output_df.createOrReplaceTempView(output_table_name)
-  return spark_session.sql(query_2(output_table_name))
 
+def job_2(spark_session: SparkSession, input_df: DataFrame, input_table_name: str) -> Optional[DataFrame]:
+    input_df.createOrReplaceTempView(input_table_name)
+    return spark_session.sql(query_2(input_table_name))
 def main():
-    output_table_name: str = "sumanacheera.user_devices_cumulated"
+    input_table_name: str = "nba_players"
+    output_table_name: str = "nba_player_scd_merge"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
         .appName("job_2")
         .getOrCreate()
     )
-    output_df = job_2(spark_session, output_table_name)
+    input_df = spark_session.table(input_table_name)
+    output_df = job_2(spark_session, input_df, input_table_name)
     output_df.write.mode("overwrite").insertInto(output_table_name)
-
