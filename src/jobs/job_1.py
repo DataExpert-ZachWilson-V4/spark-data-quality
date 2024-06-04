@@ -12,7 +12,6 @@ def query_1(output_table_name: str) -> str:
             SELECT NULL, NULL, NULL, NULL, NULL, NULL
             WHERE NOT EXISTS (SELECT * FROM {output_table_name} WHERE current_year = 1914)
         ),
-
         this_year AS (
             SELECT
                 a.actor,
@@ -28,7 +27,6 @@ def query_1(output_table_name: str) -> str:
                 
                 a.actor_id, a.actor, year
         )
-
         SELECT
             COALESCE(ly.actor, ty.actor) AS actor,
             COALESCE(ly.actor_id, ty.actor_id) AS actor_id,
@@ -51,7 +49,6 @@ def query_1(output_table_name: str) -> str:
             ty.current_year IS NOT null AS is_active,
             COALESCE(ty.current_year, ly.current_year + 1) AS current_year
         FROM last_year AS ly
-
         FULL OUTER JOIN this_year AS ty
             ON ly.actor_id = ty.actor_id
     """
@@ -61,7 +58,6 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_1(output_table_name))
-
 def main():
     output_table_name: str = "actors"
     spark_session: SparkSession = (

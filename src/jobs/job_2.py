@@ -1,7 +1,6 @@
 from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
-
 def query_2(output_table_name: str) -> str:
     query = f"""
         WITH
@@ -12,7 +11,6 @@ def query_2(output_table_name: str) -> str:
             WHERE
                 date = DATE('2022-12-31')
         ),
-
         today AS (
             SELECT
                 host,
@@ -26,7 +24,6 @@ def query_2(output_table_name: str) -> str:
                 host,
                 CAST(DATE_TRUNC('day', event_time) AS DATE)
         )
-
         SELECT
             COALESCE(y.host, t.host) AS host,
             CASE
@@ -40,13 +37,11 @@ def query_2(output_table_name: str) -> str:
             yesterday AS y
         FULL OUTER JOIN today AS t ON y.host = t.host
     """
-    return query
-
+    return querys
 def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_2(output_table_name))
-
 def main():
     output_table_name: str = "hosts_cumulated"
     spark_session: SparkSession = (

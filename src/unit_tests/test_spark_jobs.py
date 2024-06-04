@@ -5,7 +5,6 @@ from pyspark.sql import Row
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, BooleanType, ArrayType, IntegerType, DateType, TimestampType
 from ..jobs.job_1 import job_1
 from ..jobs.job_2 import job_2
-
 def test_job1(spark_session):
     output_table_name: str = "actors"
    # Create DataFrame for actors table schema, so that data types are correct
@@ -53,7 +52,6 @@ def test_job1(spark_session):
     ]
     yesterday_df = spark_session.createDataFrame(yesterday_actors_data, actors_schema)
     yesterday_df.createOrReplaceTempView(output_table_name)
-       
     # Define schema for actor_films DataFrame
     actor_films_schema = StructType([
         StructField("actor", StringType(), True),
@@ -64,7 +62,6 @@ def test_job1(spark_session):
         StructField("rating", DoubleType(), True),
         StructField("film_id", StringType(), True),
     ])
-
     # Input data for testing
     actor_films_data = [
         Row(
@@ -88,11 +85,7 @@ def test_job1(spark_session):
     ]
     actor_films_df = spark_session.createDataFrame(actor_films_data, actor_films_schema)
     actor_films_df.createOrReplaceTempView('actor_films')
-
     # Create DataFrame for expected data
-    # Expected data for testing
-    # expect actor A to have a new film in their films array in the front
-    # expect actor B to appear for the first time with one film
     expected_data = [
         Row(
             actor = 'Actor A',
@@ -142,11 +135,8 @@ def test_job1(spark_session):
         )
     ]
     expected_df = spark_session.createDataFrame(expected_data, actors_schema)
-
     actual_df = job_1(spark_session, output_table_name)
-
     assert_df_equality(actual_df, expected_df)
-
 def test_job2(spark_session):
     output_table_name: str = "hosts_cumulated"
     # create schema for hosts_cumulated table so that datatypes are correct
@@ -155,7 +145,6 @@ def test_job2(spark_session):
         StructField("host_activity_datelist", ArrayType(DateType()), True),
         StructField("date", DateType(), True)
     ])
-
     # insert yesterdays hosts_cumulated data
     yesterday_hosts_cumulated_data = [
         Row(
@@ -198,7 +187,6 @@ def test_job2(spark_session):
     ]
     web_events_df = spark_session.createDataFrame(web_events_data,web_events_schema)
     web_events_df.createOrReplaceTempView('web_events')
-
     # create expected output data
     expected_data = [
         Row(
@@ -213,7 +201,5 @@ def test_job2(spark_session):
         )
     ]
     expected_df = spark_session.createDataFrame(expected_data,hosts_cumulated_schema)
-
     actual_df = job_2(spark_session, output_table_name)
-
     assert_df_equality(actual_df, expected_df)
