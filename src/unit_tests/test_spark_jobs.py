@@ -113,7 +113,7 @@
             GameDetails("11300047","1610612755","PHI","Philadelphia",201150,"Spencer Hawes",None,	None,	"17",	1,	7,	0,	2,	4,	4,	1,	4,	5,	2,	0,	0,	0,	3,	6,	None)
         ]
     
-        input_df = spark_session.createDataFrame(input_data)
+        input_df = spark_session.createDataFrame(input_data)  
  
         expected_data = [
             OutputDetails("10300001","1610612742","DAL","Dallas",	696	,"Travis Best"	,None,	None,	"5",	4,	7,	0,	0,	2,	4,	0,	1,	1,	5,	0,	0,	3,	6,	10,	None),
