@@ -13,20 +13,6 @@ from pyspark.sql.types import (
     BooleanType,
 )
 
-
-import pytest
-from pyspark.sql import SparkSession
-
-
-def spark_session_factory(app_name: str) -> SparkSession:
-    return SparkSession.builder.master("local").appName("chispa").getOrCreate()
-
-
-@pytest.fixture(scope="session")
-def spark_session():
-    return spark_session_factory
-
-
 ActorFilms = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
 Actors = namedtuple(
     "Actors", "actor actor_id films quality_class is_active current_year"
