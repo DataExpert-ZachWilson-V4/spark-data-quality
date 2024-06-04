@@ -4,7 +4,14 @@ from pyspark.sql.dataframe import DataFrame
 
 def query_1(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
+     WITH remove_duplicates AS (
+        SELECT game_id, team_id, player_id, player_name,
+            ROW_NUMBER() OVER (PARTITION BY game_id, team_id, player_id ORDER BY game_id) AS row_number
+        FROM bootcamp.nba_game_details
+    )
+    SELECT *
+    FROM remove_duplicates
+    WHERE row_number = 1
     """
     return query
 
@@ -14,7 +21,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_1(output_table_name))
 
 def main():
-    output_table_name: str = "<output table name here>"
+    output_table_name: str = "sumanacheera.nba_game_details_duplicated"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
