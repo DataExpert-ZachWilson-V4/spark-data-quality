@@ -5,6 +5,7 @@ from pyspark.sql.dataframe import DataFrame
 
 
 def query_1(output_table_name: str) -> str:
+    # actors cumulative table from assignment 1 - query 2
     query = f"""
     WITH last_year AS (
         SELECT *

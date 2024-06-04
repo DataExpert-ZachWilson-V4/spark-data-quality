@@ -5,6 +5,7 @@ from pyspark.sql.dataframe import DataFrame
 
 
 def query_2(output_table_name: str) -> str:
+    # dedup query from assignmen 2 - query 1
     query = f"""
     WITH data_ranked AS (
         SELECT
