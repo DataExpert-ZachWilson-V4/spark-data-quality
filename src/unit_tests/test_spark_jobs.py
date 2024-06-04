@@ -1,28 +1,30 @@
+import pytest
 from chispa.dataframe_comparer import *
-from jobs.job_2 import job_2, current_year
-from jobs.job_1 import job_1
+from src.jobs.job_2 import job_2
+from src.jobs.job_1 import job_1
 from collections import namedtuple
 from datetime import date
+from pyspark.sql import SparkSession
 
 # Test 1 setup
 actor_films = namedtuple(
-    "ActorFilms", "actor, actor_id, film, year, votes, rating, film_id"
+    "ActorFilms", "actor actor_id film year votes rating film_id"
 )
 actor = namedtuple(
-    "Actor", "actor, actor_id, films, quality_class, is_active, current_year"
+    "Actor", "actor actor_id films quality_class is_active current_year"
 )
 
 # Test 2 setup
-devices = namedtuple("Devices", "device_id, browser_type, dates_active")
+devices = namedtuple("Devices", "device_id browser_type dates_active")
 web_events = namedtuple(
-    "WebEvents", "user_id, device_id, referrer, host, url, event_time"
+    "WebEvents", "user_id device_id referrer host url event_time"
 )
 devices_cumulated = namedtuple(
-    "DevicesCumulated", "user_id, browser_type, dates_active, date"
+    "DevicesCumulated", "user_id browser_type dates_active date"
 )
 
 
-def test_job1(spark):
+def test_job1(spark: SparkSession):
     current_year = 2010
 
     input_data_actor_films = [
@@ -132,13 +134,13 @@ def test_job1(spark):
     ]
     expected_df = spark.createDataFrame(expected_output)
 
-    actual_df = job_2(spark, "actors", current_year)
+    actual_df = job_2(spark, "actors")
 
     # Assert
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
 
 
-def test_job2(spark):
+def test_job2(spark: SparkSession):
 
     input_data_devices = [
         devices(-1894773659, "Chrome", [date(2022, 12, 31)]),
@@ -212,7 +214,11 @@ def test_job2(spark):
     expected_df = spark.createDataFrame(expected_output)
 
     # acutal dataframe
-    actual_df = job_1(spark, "devices_cumulated")
+    actual_df = job_1(spark, "devices_cumulated", 2022)
 
     # assert
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
