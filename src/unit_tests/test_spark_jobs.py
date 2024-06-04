@@ -3,21 +3,15 @@
     from ..jobs.job_1 import job_1
     from ..jobs.job_2 import job_2
     from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType, BooleanType, FloatType, IntegerType
-    import sys 
-    import os
-
 
     actor_films = namedtuple("actor_films", "actor actor_id film year votes rating film_id")
     actors = namedtuple("actors", "actor actor_id films quality_class is_active current_year")
-
-
 
     def test_job_one(spark_session):
         output_table_name: str = "actors"
         input_table_name: str = "actor_films"
         this_year: str = "1929"
-        
-
+    
         input_schema = StructType([
             StructField("actor", StringType()),
             StructField("actor_id", StringType()),
@@ -112,44 +106,14 @@
     
     def test_job_two(spark_session):
         input_table_name: str = "nba_game_details"
-    
-        input_schema = StructType(
-            [
-                StructField("game_id", StringType(), False),
-                StructField("team_id", StringType(), False),
-                StructField("team_abbreviation", StringType(), True),
-                StructField("team_city", StringType(), False),
-                StructField("player_id", StringType(), False),
-                StructField("player_name", StringType(), False),
-                StructField("start_position", StringType(), True),
-                StructField("comment", StringType(), True),
-                StructField("min", StringType(), True), 
-                StructField("fgm", LongType(), True),
-                StructField("fga", LongType(), True),
-                StructField("fg3m", LongType(), True),
-                StructField("fg3a", LongType(), True),
-                StructField("ftm", LongType(), True),
-                StructField("fta", LongType(), True),
-                StructField("oreb", LongType(), True),
-                StructField("dreb", LongType(), True),
-                StructField("reb", LongType(), True),
-                StructField("ast", LongType(), True),
-                StructField("stl", LongType(), True),
-                StructField("blk", LongType(), True),
-                StructField("to", LongType(), True),
-                StructField("pf", LongType(), True),
-                StructField("pts", LongType(), True),
-                StructField("plus_minus", LongType(), True),
-            ]
-        )
-    
+
         input_data = [
             GameDetails("10300001","1610612742","DAL","Dallas",	696	,"Travis Best"	,None,	None,	"5",	4,	7,	0,	0,	2,	4,	0,	1,	1,	5,	0,	0,	3,	6,	10,	None),
             GameDetails("10300001","1610612742","DAL","Dallas",	696	,"Travis Best"	,None,	None,	"5",	4,	7,	0,	0,	2,	4,	0,	1,	1,	5,	0,	0,	3,	6,	10,	None),
             GameDetails("11300047","1610612755","PHI","Philadelphia",201150,"Spencer Hawes",None,	None,	"17",	1,	7,	0,	2,	4,	4,	1,	4,	5,	2,	0,	0,	0,	3,	6,	None)
         ]
     
-        input_df = spark_session.createDataFrame(input_data, input_schema)
+        input_df = spark_session.createDataFrame(input_data)
     
         expected_schema = StructType(
             [
