@@ -13,6 +13,20 @@ from pyspark.sql.types import (
     BooleanType,
 )
 
+
+import pytest
+from pyspark.sql import SparkSession
+
+
+def spark_session_factory(app_name: str) -> SparkSession:
+    return SparkSession.builder.master("local").appName("chispa").getOrCreate()
+
+
+@pytest.fixture(scope="session")
+def spark_session():
+    return spark_session_factory
+
+
 ActorFilms = namedtuple("ActorFilms", "actor actor_id film year votes rating film_id")
 Actors = namedtuple(
     "Actors", "actor actor_id films quality_class is_active current_year"
@@ -49,6 +63,7 @@ def test_job1(spark_session) -> None:
             "Lillian Gish", "nm0001273", "Home, Sweet Home", 1914, 190, 5.8, "tt0003167"
         ),
     ]
+    # Get the cumulative insertion query output
     actors_1914 = [
         Actors(
             "Lillian Gish",
@@ -70,6 +85,7 @@ def test_job1(spark_session) -> None:
             1914,
         ),
     ]
+    # Setup input and output schemas
     input_schema = StructType(
         [
             StructField("actor", StringType(), True),
@@ -105,7 +121,9 @@ def test_job1(spark_session) -> None:
     actors_1914_df = spark.createDataFrame(actors_1914, schema=output_schema)
     actors_1914_df.createOrReplaceTempView("actors")
 
+    # Run query
     query_1914_output = job_1(spark, actor_films_1914_df, "actors", "actor_films", 1913)
+    # Check the output of the query
     assert_df_equality(query_1914_output, actors_1914_df)
 
 
@@ -174,69 +192,10 @@ def test_job2(spark_session) -> None:
             0,
             -11,
         ),
-        NBAGameDetails(
-            "21000424",
-            "1610612755",
-            "PHI",
-            "Philadelphia",
-            "201150",
-            "Spencer Hawes",
-            None,
-            "C",
-            None,
-            "19:43",
-            3,
-            8,
-            0.375,
-            0,
-            0,
-            0.0,
-            0,
-            0,
-            0.0,
-            3,
-            4,
-            7,
-            1,
-            0,
-            0,
-            4,
-            2,
-            6,
-            -7,
-        ),
-        NBAGameDetails(
-            "21000555",
-            "1610612755",
-            "PHI",
-            "Philadelphia",
-            "201150",
-            "Spencer Hawes",
-            None,
-            "C",
-            None,
-            "4:56",
-            0,
-            2,
-            0.0,
-            0,
-            0,
-            0.0,
-            0,
-            0,
-            0.0,
-            0,
-            2,
-            2,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            -11,
-        ),
     ]
+    nba_game_details.extend(nba_game_details)
+
+    # Get the deduped NBA Game Details
     nba_game_details_deduped = [
         NBAGameDetails(
             "21000424",
@@ -301,6 +260,7 @@ def test_job2(spark_session) -> None:
             -11,
         ),
     ]
+    # Setup input and output schemas for the NBA Game Details
     schema = StructType(
         [
             StructField("game_id", StringType(), True),
@@ -340,7 +300,9 @@ def test_job2(spark_session) -> None:
     nba_game_details_deduped_df = spark_session("job_2").createDataFrame(
         nba_game_details_deduped, schema
     )
+    # Run the query
     query_output = job_2(
         spark_session("job_2"), "nba_game_details", nba_game_details_df
     )
+    # Check the output of the query
     assert_df_equality(query_output, nba_game_details_deduped_df)
