@@ -78,41 +78,41 @@ def test_job_1_game_dedup(spark_session):
     assert_df_equality(expected_output_df, actual_df, ignore_nullable=True, ignore_row_order=True)
 
 
-def test_user_devices_cumulative_table(spark_session):
+def test_job_2_user_devices_cumulated(spark_session):
     """
-    Test for job2 device cumulation query
-    Note: Job2 is also not mocking or writing the 'bootcamp.nba_game_details' table into
-    the spark session. Consider AWS glue or in-repo db conn for job end-to-end test
-    TODO: will be nice to repro this setup in my own Spark project. 
-    Haven't built spark schemas for this test, save it for future exercise
+    Test for job2 device cumulated
+    Note: see fact-data-modelling query 3
+
+    TODO: Haven't built spark schemas for this test, save it for future exercise
     TODO: Note: that this job processes 3 tables, we want to keep a test focussed on single responsibility.
         However, we could (and should) update our job query to accept kwargs for the other 2,
         and then write 2 more table focussed unit tests
-    Note: TA please don't dock me for not doing the afore mentioned -- I'm maxed out btwn assembly and c programing
+    Note: TA (Joe) please don't dock me for not doing the afore mentioned -- I'm maxed out btwn assembly and c programing
     at my uni data structs algos and architecture classes and im working full time as well.
     Please have mercy!!!
+    I really intend on working more w/ this module and adding more tests
     """
         
-    web_event = namedtuple("web_events", "user_id device_id referrer host url event_time")
-    device = namedtuple("devices", "device_id browser_type os_type device_type")
-    devices_cumulated = namedtuple("devices_cumulated", "user_id browser_type dates_active date")
-
-    input_devices_cumulated = [
-        devices_cumulated(
-            587642973, "Chrome", [date(2024, 5, 1)], date(2024, 5, 2)
-        )
-    ]
+    web_event = namedtuple("web_event", "user_id device_id referrer host url event_time")
+    device = namedtuple("device", "device_id browser_type os_type device_type")
+    device_cumulated = namedtuple("device_cumulated", "user_id browser_type dates_active date")
 
     input_web_events = [
-        web_event(587642973, 9121527308, "http://admin.zachwilson.tech", "admin.zachwilson.tech", "/", "2024-01-05 11:34:14.204 UTC")
+        web_event(587642973, 9121527308, "http://admin.zachwilson.tech", "admin.zachwilson.tech", "/", "2022-01-02 11:34:14.204 UTC")
     ]
 
     input_devices = [
         device(9121527308, "Chrome", "Mac OS X", "Other")
     ]
 
+    input_devices_cumulated = [
+        device_cumulated(
+            587642973, "Chrome", [date(2022, 1, 1)], date(2022, 1, 2)
+        )
+    ]
+
     test_devices_cumulated_df = spark_session.createDataFrame(input_devices_cumulated)
-    test_devices_cumulated_df.createOrReplaceTempView("devices_cumulated")
+    test_devices_cumulated_df.createOrReplaceTempView("user_devices_cumulated")
 
     test_web_events_df = spark_session.createDataFrame(input_web_events)
     test_web_events_df.createOrReplaceTempView("web_events")
@@ -120,10 +120,12 @@ def test_user_devices_cumulative_table(spark_session):
     test_input_devices_df = spark_session.createDataFrame(input_devices)
     test_input_devices_df.createOrReplaceTempView("devices")
 
+    # note: not passing in existing input_devices_cumulated
     expected_output = [
-        devices_cumulated(587642973, "Chrome", [date(2024, 5, 1), date(2024, 5, 2)], date(2024, 5, 2))
+        device_cumulated(587642973, "Chrome", [date(2022, 1, 2)], date(2022, 1, 2))
     ]
     expected_output_df = spark_session.createDataFrame(expected_output)
 
-    actual_df = job_2(spark_session, "shabab.user_devices_cumulated")
+    actual_df = job_2(spark_session, "web_events")
+
     assert_df_equality(actual_df, expected_output_df, ignore_nullable=True)
