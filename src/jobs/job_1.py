@@ -4,15 +4,29 @@ from pyspark.sql.dataframe import DataFrame
 
 
 def query_1(output_table_name: str) -> str:
-    query = \
-        f"""
-            with 
-                nba_game_details_dedup as (
-                    select *, 
-                        ROW_NUMBER() over (PARTITION BY game_id, team_id, player_id) as row_number
-                    from {output_table_name}
-                ),
-            select * from nba_game_details_dedup where row_number = 1
+    query = f"""
+        with nba_game_details_dedup as (
+            select *, ROW_NUMBER() over (
+                PARTITION BY game_id, team_id, player_id 
+                order by game_id, team_id, player_id
+            ) as row_number
+            from {output_table_name}
+        )
+        select 
+            game_id,
+            team_id,
+            team_abbreviation,
+            team_city,
+            player_id,
+            player_name,
+            nickname,
+            start_position,
+            comment,
+            min,
+            fgm,
+            fga,
+            fg_pct 
+        from nba_game_details_dedup where row_number = 1
         """
 
     return query
@@ -25,7 +39,7 @@ def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
 
 
 def main():
-    output_table_name: str = "bootcamp.nba_game_details"
+    output_table_name: str = "nba_game_details"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")

@@ -10,11 +10,10 @@ from tests.conftest import spark_session
 
 
 # Ref: review lab day 3
-def test_game_dedup(spark_session):
+def test_job_1_game_dedup(spark_session):
     """
     Test for job1 dedup nba_game_details
-    Note: Job1 is not mocking or writing the 'bootcamp.nba_game_details' table into
-    the spark session. Consider AWS glue or in-repo db conn for job end-to-end test
+    Note: see fact-data-modelling query 1
     """
 
     game_detail = namedtuple(
@@ -71,12 +70,12 @@ def test_game_dedup(spark_session):
     )
 
     input_df = spark_session.createDataFrame(input_data, schema=game_detail_schema)
-    input_df.createOrReplaceTempView("game_detail")
+    input_df.createOrReplaceTempView("nba_game_details")
     expected_output_df = spark_session.createDataFrame(expected_output, schema=game_detail_schema)
 
-    actual_df = job_1(spark_session, "bootcamp.nba_game_details")
+    actual_df = job_1(spark_session, "nba_game_details")
 
-    assert_df_equality(expected_output_df, actual_df, ignore_nullable=True)
+    assert_df_equality(expected_output_df, actual_df, ignore_nullable=True, ignore_row_order=True)
 
 
 def test_user_devices_cumulative_table(spark_session):
