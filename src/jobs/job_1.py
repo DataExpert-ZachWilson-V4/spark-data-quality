@@ -2,19 +2,44 @@ from typing import Optional
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
+
 def query_1(output_table_name: str) -> str:
     query = f"""
-    <YOUR QUERY HERE>
-    """
+        with nba_game_details_dedup as (
+            select *, ROW_NUMBER() over (
+                PARTITION BY game_id, team_id, player_id 
+                order by game_id, team_id, player_id
+            ) as row_number
+            from {output_table_name}
+        )
+        select 
+            game_id,
+            team_id,
+            team_abbreviation,
+            team_city,
+            player_id,
+            player_name,
+            nickname,
+            start_position,
+            comment,
+            min,
+            fgm,
+            fga,
+            fg_pct 
+        from nba_game_details_dedup where row_number = 1
+        """
+
     return query
+
 
 def job_1(spark_session: SparkSession, output_table_name: str) -> Optional[DataFrame]:
   output_df = spark_session.table(output_table_name)
   output_df.createOrReplaceTempView(output_table_name)
   return spark_session.sql(query_1(output_table_name))
 
+
 def main():
-    output_table_name: str = "<output table name here>"
+    output_table_name: str = "nba_game_details"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
