@@ -75,7 +75,7 @@ def test_devices_cumulated_table(spark):
     expected_df = spark.createDataFrame(expected_output)
 
     # running the job
-    actual_df = job_1(spark, "devices_cumulated")
+    actual_df = job_1(spark, "user_devices_cumulated")
 
     # verifying that the dataframes are identical
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)
