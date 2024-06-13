@@ -61,7 +61,7 @@ def test_devices_cumulated_table(spark):
         devices_cumulated(1041379120, None, [date(2023, 1, 1)], date(2023, 1, 1)),
     ]
     devices_cumulated_df = spark.createDataFrame(input_data_devices_cumulated)
-    devices_cumulated_df.createOrReplaceTempView("devices_cumulated")
+    devices_cumulated_df.createOrReplaceTempView("user_devices_cumulated")
 
     # expected output based on our input
     expected_output = [
