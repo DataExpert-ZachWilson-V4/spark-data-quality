@@ -4,7 +4,7 @@ from jobs.job_1 import job_1
 from jobs.job_2 import job_2
 from chispa.dataframe_comparer import *
 from collections import namedtuple
-
+# trino schema: xeno
 job1_in = namedtuple("job1_in", "actor actor_id	films quality_class	is_active current_year")
 job1_out = namedtuple("job1_out", "actor_id	actor quality_class	is_active start_date end_date current_year")
 

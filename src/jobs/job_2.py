@@ -60,7 +60,7 @@ def job_2(spark_session: SparkSession, output_table_name: str) -> Optional[DataF
   return spark_session.sql(query_2(output_table_name))
 
 def main():
-    output_table_name: str = "<output table name here>"
+    output_table_name: str = "nba_spark"
     spark_session: SparkSession = (
         SparkSession.builder
         .master("local")
